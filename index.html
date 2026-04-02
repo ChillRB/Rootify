@@ -3,118 +3,169 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rootify — Pedigree Creator</title>
+<title>Rootify v3</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
+:root{
   --bg:#1e1e1e;--bg-panel:#252526;--bg-sidebar:#2c2c2c;--bg-titlebar:#323233;
   --bg-hover:#2a2d2e;--bg-sel:#04395e;--border:#3c3c3c;
   --text:#cccccc;--text-dim:#858585;--text-blue:#569cd6;--text-teal:#4ec9b0;
   --accent:#007acc;--accent2:#1a8ad4;--red:#f44747;--yellow:#dcdcaa;
-  --font:'JetBrains Mono','Consolas',monospace;
+  --grid-dot:#2a2a2a;--sym:#d4d4d4;--lbl:#7a8894;--font:'JetBrains Mono','Consolas',monospace;
+}
+body.light{
+  --bg:#f5f5f5;--bg-panel:#ececec;--bg-sidebar:#e3e3e3;--bg-titlebar:#d7d7d7;
+  --bg-hover:#ddd;--bg-sel:#c9e0f5;--border:#c0c0c0;
+  --text:#1a1a1a;--text-dim:#666;--text-blue:#005fa3;--text-teal:#00796b;
+  --accent:#0078d4;--accent2:#106ebe;--red:#d32f2f;--yellow:#7a5f00;
+  --grid-dot:#e0e0e0;--sym:#1a1a1a;--lbl:#555;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:12px;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:12px;-webkit-font-smoothing:antialiased;transition:background .18s,color .18s;}
 
 /* ── TITLEBAR ── */
-#titlebar{height:30px;background:var(--bg-titlebar);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-dim);border-bottom:1px solid var(--border);flex-shrink:0;user-select:none;letter-spacing:.04em;position:relative;}
-.dots{display:flex;gap:6px;position:absolute;left:14px;}
+#titlebar{height:30px;background:var(--bg-titlebar);display:flex;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0;user-select:none;position:relative;}
+.dots{display:flex;gap:6px;padding:0 14px;align-items:center;}
 .dot{width:12px;height:12px;border-radius:50%;}
 .dot-r{background:#ff5f57;}.dot-y{background:#ffbd2e;}.dot-g{background:#28c840;}
-.title-right{position:absolute;right:10px;display:flex;gap:5px;align-items:center;}
-.tiny-btn{padding:2px 7px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-size:10px;font-family:var(--font);transition:all .12s;}
-.tiny-btn:hover{color:var(--text);background:var(--bg-hover);}
-.tiny-btn.on{background:var(--bg-sel);color:var(--text-blue);border-color:var(--accent);}
+.mode-tabs{display:flex;height:100%;}
+.mode-tab{padding:0 16px;font-size:11px;cursor:pointer;color:var(--text-dim);border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;transition:all .12s;white-space:nowrap;letter-spacing:.02em;}
+.mode-tab:hover{color:var(--text);background:var(--bg-hover);}
+.mode-tab.active{color:var(--text);border-bottom-color:var(--accent);}
+.title-center{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;color:var(--text-dim);pointer-events:none;letter-spacing:.04em;}
+.title-right{position:absolute;right:8px;display:flex;gap:4px;align-items:center;}
+.tb{padding:2px 7px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-size:10px;font-family:var(--font);transition:all .12s;}
+.tb:hover{color:var(--text);background:var(--bg-hover);}.tb.on{background:var(--bg-sel);color:var(--text-blue);border-color:var(--accent);}
 
 /* ── MAIN ── */
 #main{flex:1;display:flex;overflow:hidden;}
-
-/* ── ACTIVITY BAR ── */
 #actbar{width:48px;background:var(--bg-panel);display:flex;flex-direction:column;align-items:center;padding:4px 0;border-right:1px solid var(--border);flex-shrink:0;gap:2px;}
 .act-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);transition:color .15s;border-left:2px solid transparent;}
-.act-btn:hover{color:var(--text);}
-.act-btn.active{color:var(--text);border-left-color:var(--accent);}
+.act-btn:hover{color:var(--text);}.act-btn.active{color:var(--text);border-left-color:var(--accent);}
 .act-btn svg{width:20px;height:20px;}
 
 /* ── SIDEBAR ── */
-#sidebar{width:244px;background:var(--bg-panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
-.panel{display:none;flex:1;flex-direction:column;overflow-y:auto;}
-.panel.show{display:flex;}
+#sidebar{width:248px;background:var(--bg-panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.panel{display:none;flex:1;flex-direction:column;overflow-y:auto;}.panel.show{display:flex;}
 .sec-hdr{padding:8px 12px 6px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);font-weight:600;user-select:none;display:flex;align-items:center;gap:5px;flex-shrink:0;border-bottom:1px solid var(--border);}
-.sub-hdr{padding:7px 12px 2px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#4a5568;user-select:none;}
+.sub-hdr{padding:7px 12px 2px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);opacity:.55;user-select:none;}
 
 /* ── TOOL GRID ── */
 .tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:4px 8px;}
 .tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:7px 4px 5px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;cursor:pointer;color:var(--text-dim);transition:all .12s;font-size:9px;font-family:var(--font);}
-.tool-btn:hover{background:var(--bg-hover);color:var(--text);border-color:#666;}
+.tool-btn:hover{background:var(--bg-hover);color:var(--text);border-color:#888;}
 .tool-btn.active{background:var(--bg-sel);color:var(--text-blue);border-color:var(--accent);}
 .tool-btn svg{width:16px;height:16px;}
-.tool-btn.wide{grid-column:span 2;flex-direction:row;gap:8px;padding:5px 10px;justify-content:flex-start;}
 
-/* ── ACTION STRIP ── */
 .act-strip{display:flex;gap:3px;padding:3px 8px;}
 .as-btn{flex:1;padding:5px 0;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-size:10px;font-family:var(--font);text-align:center;transition:all .12s;}
-.as-btn:hover{background:var(--bg-hover);color:var(--text);border-color:#666;}
-.as-btn.on{background:var(--bg-sel);color:var(--text-blue);border-color:var(--accent);}
+.as-btn:hover{background:var(--bg-hover);color:var(--text);border-color:#888;}
 .as-btn:disabled{opacity:.35;cursor:not-allowed;}
 .full-btn{margin:2px 8px;padding:5px 10px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-size:10px;font-family:var(--font);text-align:left;transition:all .12s;width:calc(100% - 16px);}
-.full-btn:hover{background:var(--bg-hover);color:var(--text);border-color:#666;}
-.full-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
-.full-btn.primary:hover{background:var(--accent2);}
-.full-btn.danger{color:var(--red);border-color:var(--border);}
-.full-btn.danger:hover{background:rgba(244,71,71,.12);}
+.full-btn:hover{background:var(--bg-hover);color:var(--text);border-color:#888;}
+.full-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}.full-btn.primary:hover{background:var(--accent2);}
+.full-btn.danger{color:var(--red);}.full-btn.danger:hover{background:rgba(244,71,71,.12);}
+
+/* ── SEARCH ── */
+.srch-wrap{padding:5px 8px;}
+.srch-inp{width:100%;padding:5px 8px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:11px;outline:none;transition:border-color .12s;}
+.srch-inp:focus{border-color:var(--accent);}
+.srch-inp::placeholder{color:var(--text-dim);}
 
 /* ── PROPS ── */
 .prop-group{padding:5px 10px;display:flex;flex-direction:column;gap:4px;}
 .prop-lbl{font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
 .prop-row{display:flex;gap:3px;flex-wrap:wrap;}
 .prop-btn{flex:1;min-width:0;padding:4px 4px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-size:9px;font-family:var(--font);transition:all .12s;text-align:center;white-space:nowrap;}
-.prop-btn:hover{background:var(--bg-hover);color:var(--text);border-color:#666;}
+.prop-btn:hover{background:var(--bg-hover);color:var(--text);border-color:#888;}
 .prop-btn.on{background:var(--bg-sel);color:var(--text-blue);border-color:var(--accent);}
 .prop-btn.red{color:var(--red);}.prop-btn.red:hover{background:rgba(244,71,71,.12);}
 .prop-input{width:100%;padding:4px 7px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:11px;outline:none;transition:border-color .12s;}
 .prop-input:focus{border-color:var(--accent);}
-.prop-input::placeholder{color:#4a5568;}
+.prop-input::placeholder{color:var(--text-dim);}
 .prop-id{color:var(--text-blue);font-size:13px;font-weight:600;padding:1px 0 2px;}
 .no-sel{padding:20px 14px;color:var(--text-dim);font-size:11px;line-height:1.8;text-align:center;}
 .no-sel code{color:var(--text-blue);background:var(--bg);padding:1px 5px;border-radius:2px;font-size:10px;}
 
-/* ── INFO BOX ── */
-.info{margin:5px 8px;padding:6px 9px;background:rgba(0,122,204,.07);border:1px solid rgba(0,122,204,.2);border-radius:3px;font-size:10px;color:var(--text-dim);line-height:1.75;}
-.info kbd{background:var(--bg);border:1px solid var(--border);padding:0 3px;border-radius:2px;font-family:var(--font);font-size:9px;color:var(--text);}
-.info b{color:var(--text);}
+/* ── STATS ── */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 12px;font-size:11px;border-bottom:1px solid var(--border);}
+.stat-k{color:var(--text-dim);font-size:10px;letter-spacing:.04em;}
+.stat-v{color:var(--text-blue);font-weight:600;}
+.stat-bar-wrap{margin:1px 12px 6px;height:3px;background:var(--bg-sidebar);border-radius:2px;overflow:hidden;}
+.stat-bar{height:100%;border-radius:2px;transition:width .3s;}
 
 /* ── LEGEND ── */
 .leg-item{display:flex;align-items:center;gap:10px;padding:5px 12px;font-size:11px;color:var(--text-dim);}
 .leg-item:hover{background:var(--bg-hover);color:var(--text);}
 .leg-sym{width:18px;height:18px;flex-shrink:0;}
 
-/* ── EDITOR ── */
-#editor{flex:1;position:relative;overflow:hidden;background:var(--bg);background-image:radial-gradient(circle,#2a2a2a 1px,transparent 1px);background-size:20px 20px;}
-#canvas{position:absolute;top:0;left:0;cursor:default;}
+/* ── INFO BOX ── */
+.info{margin:5px 8px;padding:6px 9px;background:rgba(0,122,204,.07);border:1px solid rgba(0,122,204,.2);border-radius:3px;font-size:10px;color:var(--text-dim);line-height:1.75;}
+.info kbd{background:var(--bg);border:1px solid var(--border);padding:0 3px;border-radius:2px;font-family:var(--font);font-size:9px;color:var(--text);}
+.info b{color:var(--text);}
 
-/* ── GEN LABELS ── */
+/* ── EDITOR ── */
+#editor{flex:1;position:relative;overflow:hidden;background:var(--bg);background-image:radial-gradient(circle,var(--grid-dot) 1px,transparent 1px);background-size:20px 20px;}
+#canvas{position:absolute;top:0;left:0;}
 #gen-labels{position:absolute;top:0;left:0;pointer-events:none;font-family:var(--font);}
 .gen-label{position:absolute;left:8px;transform:translateY(-50%);color:#3d4e5e;font-size:12px;font-weight:600;letter-spacing:.05em;user-select:none;}
+.gen-label.light-lbl{color:#8a9aaa;}
+#sel-box-el{display:none;position:absolute;border:1px dashed var(--accent);background:rgba(0,122,204,.06);pointer-events:none;}
 
-/* ── FLOATING RENAME ── */
+/* ── PUNNETT VIEW ── */
+#punnett-view{flex:1;display:none;overflow:hidden;}
+#punnett-view.show{display:flex;}
+#punnett-sidebar{width:260px;background:var(--bg-panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
+#punnett-main{flex:1;overflow:auto;background:var(--bg);display:flex;align-items:flex-start;justify-content:flex-start;padding:24px;gap:24px;flex-wrap:wrap;}
+
+/* Punnett tabs */
+.pun-tabs{display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px 4px;}
+.pun-tab{flex:1;min-width:0;padding:4px 5px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-size:9px;font-family:var(--font);text-align:center;transition:all .12s;white-space:nowrap;}
+.pun-tab:hover{color:var(--text);border-color:#888;}
+.pun-tab.active{background:var(--bg-sel);color:var(--text-blue);border-color:var(--accent);}
+.pun-sel{padding:4px 8px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:11px;outline:none;cursor:pointer;width:100%;}
+.pun-sel:focus{border-color:var(--accent);}
+.pun-inp{padding:5px 8px;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .12s;text-align:center;letter-spacing:.1em;font-weight:600;}
+.pun-inp:focus{border-color:var(--accent);}
+.pun-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.pun-lbl{font-size:10px;color:var(--text-dim);min-width:64px;flex-shrink:0;text-transform:uppercase;letter-spacing:.05em;}
+
+/* Punnett cards */
+.pun-card{background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;overflow:hidden;min-width:200px;}
+.pun-card-hdr{padding:8px 14px 6px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;align-items:center;}
+.pun-grid-wrap{padding:14px;}
+table.pun-grid{border-collapse:collapse;}
+table.pun-grid td,table.pun-grid th{border:1px solid var(--border);min-width:56px;height:52px;text-align:center;font-family:var(--font);font-weight:600;font-size:13px;padding:4px 8px;transition:filter .15s;}
+table.pun-grid th{background:var(--bg-sidebar);color:var(--text-dim);font-size:11px;font-weight:500;min-width:48px;height:38px;}
+.pun-corner{background:var(--bg-sidebar);}
+.pun-dom{background:rgba(0,122,204,.18);color:var(--text-blue);}
+.pun-rec{background:rgba(244,71,71,.16);color:var(--red);}
+.pun-het{background:rgba(78,201,176,.16);color:var(--text-teal);}
+.pun-inc-dom{background:rgba(0,122,204,.14);color:var(--text-blue);}
+.pun-inc-mid{background:rgba(220,220,170,.18);color:var(--yellow);}
+.pun-cod-ab{background:rgba(200,150,220,.2);color:#c496d8;}
+.pun-blood-a{background:rgba(0,122,204,.18);color:var(--text-blue);}
+.pun-blood-b{background:rgba(244,71,71,.16);color:var(--red);}
+.pun-blood-ab{background:rgba(220,220,170,.18);color:var(--yellow);}
+.pun-blood-o{background:rgba(78,201,176,.16);color:var(--text-teal);}
+
+.ratio-row{display:flex;justify-content:space-between;align-items:center;padding:5px 14px;font-size:11px;border-bottom:1px solid var(--border);}
+.ratio-row:last-child{border-bottom:none;}
+.ratio-k{color:var(--text-dim);font-family:var(--font);}
+.ratio-v{color:var(--text-blue);font-weight:600;}
+.ratio-bar{height:3px;margin:1px 14px 5px;border-radius:2px;background:var(--accent);}
+.pun-prob-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;margin:1px;}
+
+/* ── OVERLAYS ── */
 #rename-wrap{display:none;position:absolute;z-index:100;}
-#rename-input{padding:3px 8px;background:#1a1a1a;border:1.5px solid var(--accent);border-radius:4px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;min-width:120px;box-shadow:0 4px 20px rgba(0,0,0,.6);}
-
-/* ── TOOLTIP ── */
-#tooltip{display:none;position:fixed;background:var(--bg-panel);border:1px solid #555;border-radius:5px;padding:7px 11px;font-size:11px;color:var(--text-dim);max-width:200px;line-height:1.65;z-index:200;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.5);}
+#rename-input{padding:3px 8px;background:var(--bg);border:1.5px solid var(--accent);border-radius:4px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;min-width:120px;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+#tooltip{display:none;position:fixed;background:var(--bg-panel);border:1px solid #555;border-radius:5px;padding:7px 11px;font-size:11px;color:var(--text-dim);max-width:220px;line-height:1.65;z-index:200;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.5);}
 #tooltip b{color:var(--text);display:block;margin-bottom:2px;}
-
-/* ── ZOOM CONTROLS ── */
+#hint{display:none;position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--accent);padding:5px 18px;border-radius:16px;font-size:11px;color:var(--text-blue);pointer-events:none;box-shadow:0 2px 16px rgba(0,122,204,.25);}
 #zoom-ctrl{position:absolute;bottom:40px;right:14px;display:flex;flex-direction:column;gap:3px;z-index:10;}
-.z-btn{width:28px;height:28px;background:var(--bg-panel);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .12s;user-select:none;}
-.z-btn:hover{background:var(--bg-hover);color:var(--text);border-color:#666;}
-
-/* ── HINT ── */
-#hint{display:none;position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--accent);padding:5px 18px;border-radius:16px;font-size:11px;color:var(--text-blue);pointer-events:none;box-shadow:0 2px 16px rgba(0,122,204,.25);letter-spacing:.03em;}
-
-/* ── CONTEXT MENU ── */
-#ctx{display:none;position:fixed;background:var(--bg-panel);border:1px solid var(--border);border-radius:5px;z-index:1000;min-width:175px;box-shadow:0 6px 24px rgba(0,0,0,.55);overflow:hidden;padding:3px 0;}
+.z-btn{width:28px;height:28px;background:var(--bg-panel);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .12s;user-select:none;}
+.z-btn:hover{background:var(--bg-hover);color:var(--text);}
+#ctx{display:none;position:fixed;background:var(--bg-panel);border:1px solid var(--border);border-radius:5px;z-index:1000;min-width:175px;box-shadow:0 6px 24px rgba(0,0,0,.5);padding:3px 0;}
 .ctx-dim{font-size:10px;color:var(--text-dim);padding:4px 14px 2px;pointer-events:none;}
 .ctx-item{padding:5px 14px;cursor:pointer;font-size:11px;color:var(--text);transition:background .1s;display:flex;align-items:center;gap:9px;}
 .ctx-item:hover{background:var(--accent);}
@@ -122,15 +173,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 .ctx-sep{height:1px;background:var(--border);margin:3px 0;}
 
 /* ── STATUS BAR ── */
-#statusbar{height:24px;background:var(--accent);display:flex;align-items:center;padding:0 12px;gap:14px;font-size:11px;color:rgba(255,255,255,.92);flex-shrink:0;user-select:none;}
+#statusbar{height:24px;background:var(--accent);display:flex;align-items:center;padding:0 12px;gap:12px;font-size:11px;color:rgba(255,255,255,.92);flex-shrink:0;user-select:none;}
 .sb-sep{opacity:.4;font-weight:300;}
-#sb-right{margin-left:auto;display:flex;gap:14px;align-items:center;}
+#sb-right{margin-left:auto;display:flex;gap:12px;align-items:center;}
 
-/* ── SCROLLBAR ── */
+/* ── COLOR INPUT ── */
+.color-row{display:flex;align-items:center;gap:6px;}
+.color-swatch{width:22px;height:22px;border-radius:3px;border:1px solid var(--border);cursor:pointer;flex-shrink:0;}
+
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:#444;border-radius:3px;}
-::-webkit-scrollbar-thumb:hover{background:#555;}
 </style>
 </head>
 <body>
@@ -138,24 +191,38 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 <!-- TITLEBAR -->
 <div id="titlebar">
   <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
-  Rootify — pedigree-creator.ped
+  <div class="mode-tabs">
+    <div class="mode-tab active" id="tab-ped" onclick="setMode('pedigree')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Pedigree
+    </div>
+    <div class="mode-tab" id="tab-pun" onclick="setMode('punnett')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
+      Punnett Square
+    </div>
+  </div>
+  <div class="title-center">Rootify — pedigree-creator.ped</div>
   <div class="title-right">
-    <button class="tiny-btn on" id="snap-btn" onclick="toggleSnap()">⊞ Snap</button>
-    <button class="tiny-btn on" id="guide-btn" onclick="toggleGuides()">⊟ Guides</button>
-    <button class="tiny-btn" onclick="exportPNG()">⬇ PNG</button>
+    <button class="tb on" id="snap-btn" onclick="toggleSnap()">⊞ Snap</button>
+    <button class="tb on" id="guide-btn" onclick="toggleGuides()">⊟ Guides</button>
+    <button class="tb on" id="lbl-btn" onclick="toggleLabels()">⊤ Labels</button>
+    <button class="tb" id="theme-btn" onclick="toggleTheme()">◑ Theme</button>
+    <button class="tb" onclick="exportPNG()">⬇ PNG</button>
   </div>
 </div>
 
 <!-- MAIN -->
 <div id="main">
-
   <!-- ACTIVITY BAR -->
   <div id="actbar">
     <div class="act-btn active" id="act-tools" title="Tools" onclick="showPanel('tools')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></svg>
     </div>
     <div class="act-btn" id="act-props" title="Properties" onclick="showPanel('props')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M8.46 8.46a5 5 0 0 0 0 7.07"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    </div>
+    <div class="act-btn" id="act-stats" title="Statistics" onclick="showPanel('stats')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     </div>
     <div class="act-btn" id="act-legend" title="Legend" onclick="showPanel('legend')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -167,121 +234,146 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 
     <!-- TOOLS PANEL -->
     <div id="panel-tools" class="panel show">
-      <div class="sec-hdr">
-        <svg width="8" height="8" viewBox="0 0 8 8"><polygon points="4,0 8,8 0,8" fill="currentColor"/></svg>
-        DRAWING TOOLS
-      </div>
-
+      <div class="sec-hdr">Drawing Tools</div>
       <div class="sub-hdr">Individuals</div>
       <div class="tool-grid">
-        <div class="tool-btn active" id="tb-select" onclick="setTool('select')" title="Select (V)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
-          <span>Select</span>
+        <div class="tool-btn active" id="tb-select" onclick="setTool('select')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg><span>Select</span>
         </div>
-        <div class="tool-btn" id="tb-male" onclick="setTool('male')" title="Male (M)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="14" height="14" rx="1"/></svg>
-          <span>Male ♂</span>
+        <div class="tool-btn" id="tb-male" onclick="setTool('male')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="14" height="14" rx="1"/></svg><span>Male ♂</span>
         </div>
-        <div class="tool-btn" id="tb-female" onclick="setTool('female')" title="Female (F)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="7"/></svg>
-          <span>Female ♀</span>
+        <div class="tool-btn" id="tb-female" onclick="setTool('female')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="7"/></svg><span>Female ♀</span>
         </div>
-        <div class="tool-btn" id="tb-unknown" onclick="setTool('unknown')" title="Unknown (U)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 21 12 12 21 3 12Z"/></svg>
-          <span>Unknown</span>
+        <div class="tool-btn" id="tb-unknown" onclick="setTool('unknown')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 21 12 12 21 3 12Z"/></svg><span>Unknown</span>
         </div>
-        <div class="tool-btn" id="tb-miscarriage" onclick="setTool('miscarriage')" title="Miscarriage (I)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 6 19 18 5 18Z"/></svg>
-          <span>Miscar.</span>
+        <div class="tool-btn" id="tb-miscarriage" onclick="setTool('miscarriage')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 6 19 18 5 18Z"/></svg><span>Miscar.</span>
         </div>
       </div>
-
       <div class="sub-hdr">Relationships</div>
       <div class="tool-grid">
-        <div class="tool-btn" id="tb-marry" onclick="setTool('marry')" title="Marriage (R)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="9" width="7" height="7"/><circle cx="22" cy="12" r="3.5"/><line x1="9" y1="12" x2="18.5" y2="12"/></svg>
-          <span>Marry</span>
+        <div class="tool-btn" id="tb-marry" onclick="setTool('marry')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="9" width="7" height="7"/><circle cx="22" cy="12" r="3.5"/><line x1="9" y1="12" x2="18.5" y2="12"/></svg><span>Marry</span>
         </div>
-        <div class="tool-btn" id="tb-consang" onclick="setTool('consang')" title="Consanguineous (K)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="9" width="7" height="7"/><circle cx="22" cy="12" r="3.5"/><line x1="9" y1="10.5" x2="18.5" y2="10.5"/><line x1="9" y1="13.5" x2="18.5" y2="13.5"/></svg>
-          <span>Consang.</span>
+        <div class="tool-btn" id="tb-consang" onclick="setTool('consang')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="9" width="7" height="7"/><circle cx="22" cy="12" r="3.5"/><line x1="9" y1="10.5" x2="18.5" y2="10.5"/><line x1="9" y1="13.5" x2="18.5" y2="13.5"/></svg><span>Consang.</span>
         </div>
-        <div class="tool-btn" id="tb-child" onclick="setTool('child')" title="Child (C)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="12" y1="4" x2="12" y2="11"/><line x1="5" y1="11" x2="19" y2="11"/><line x1="5" y1="11" x2="5" y2="17"/><line x1="19" y1="11" x2="19" y2="17"/></svg>
-          <span>Child</span>
+        <div class="tool-btn" id="tb-child" onclick="setTool('child')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="12" y1="4" x2="12" y2="11"/><line x1="5" y1="11" x2="19" y2="11"/><line x1="5" y1="11" x2="5" y2="17"/><line x1="19" y1="11" x2="19" y2="17"/></svg><span>Child</span>
         </div>
-        <div class="tool-btn" id="tb-twin" onclick="setTool('twin')" title="Twins (T)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="12" y1="4" x2="6" y2="13"/><line x1="12" y1="4" x2="18" y2="13"/><line x1="6" y1="13" x2="18" y2="13"/></svg>
-          <span>Twins</span>
+        <div class="tool-btn" id="tb-twin" onclick="setTool('twin')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="12" y1="4" x2="6" y2="13"/><line x1="12" y1="4" x2="18" y2="13"/><line x1="6" y1="13" x2="18" y2="13"/></svg><span>Twins</span>
         </div>
       </div>
-
       <div class="sub-hdr">History</div>
       <div class="act-strip">
         <button class="as-btn" id="undo-btn" onclick="undo()" title="Ctrl+Z">↩ Undo</button>
         <button class="as-btn" id="redo-btn" onclick="redo()" title="Ctrl+Y">↪ Redo</button>
       </div>
-
+      <div class="sub-hdr">Selection</div>
+      <div class="act-strip">
+        <button class="as-btn" onclick="selectAll()">⊞ All</button>
+        <button class="as-btn" onclick="zoomToFit()">⊙ Fit</button>
+        <button class="as-btn" onclick="zoomToSel()">⊡ Sel.</button>
+      </div>
       <div class="sub-hdr">Layout</div>
       <button class="full-btn" onclick="autoArrange()">⊞ Auto-Arrange Generations</button>
-
-      <div class="info">
-        <b>Workflow</b><br>
-        Place individuals → <kbd>Marry</kbd> → <kbd>Child</kbd><br>
-        <kbd>Dbl-click</kbd> to rename &nbsp; <kbd>Del</kbd> to delete<br>
-        <kbd>Scroll</kbd> zoom &nbsp; <kbd>Alt+drag</kbd> pan<br>
-        <kbd>↑↓←→</kbd> nudge selected
+      <div class="sub-hdr">Search</div>
+      <div class="srch-wrap">
+        <input class="srch-inp" id="search-inp" type="text" placeholder="Search by name…" oninput="onSearch(this.value)">
       </div>
-      <div class="info" style="margin-top:0">
-        <b>Shortcuts</b><br>
-        <kbd>V</kbd> Select &nbsp;<kbd>M</kbd> Male &nbsp;<kbd>F</kbd> Female<br>
-        <kbd>U</kbd> Unknown &nbsp;<kbd>I</kbd> Miscarriage<br>
-        <kbd>R</kbd> Marry &nbsp;<kbd>K</kbd> Consang. &nbsp;<kbd>C</kbd> Child &nbsp;<kbd>T</kbd> Twins<br>
-        <kbd>Ctrl+Z</kbd> Undo &nbsp;<kbd>Ctrl+Y</kbd> Redo<br>
-        <kbd>Ctrl+D</kbd> Duplicate &nbsp;<kbd>Ctrl+0</kbd> Reset view
+      <div class="sub-hdr">File</div>
+      <div class="act-strip">
+        <button class="as-btn" onclick="saveJSON()" title="Ctrl+S">💾 Save</button>
+        <button class="as-btn" onclick="document.getElementById('load-file').click()">📂 Load</button>
       </div>
-
-      <button class="full-btn primary" onclick="exportPNG()" style="margin-top:4px;">⬇ Export as PNG</button>
-      <button class="full-btn danger" onclick="clearAll()" style="margin-bottom:8px;">✕ Clear Canvas</button>
+      <input type="file" id="load-file" accept=".json" style="display:none" onchange="loadJSON(event)">
+      <div class="info" style="margin-top:4px">
+        <b>New in v3</b><br>
+        <kbd>Shift+click</kbd> multi-select &nbsp; <kbd>Space+drag</kbd> pan<br>
+        <kbd>Ctrl+A</kbd> select all &nbsp; <kbd>Ctrl+D</kbd> duplicate<br>
+        <kbd>Ctrl+S</kbd> save JSON &nbsp; <kbd>Ctrl+Shift+0</kbd> fit all<br>
+        <kbd>Ctrl+F</kbd> fit selection &nbsp; <kbd>Del</kbd> delete
+      </div>
+      <button class="full-btn primary" onclick="exportPNG()" style="margin-top:4px">⬇ Export PNG</button>
+      <button class="full-btn danger" onclick="clearAll()" style="margin-bottom:8px">✕ Clear Canvas</button>
     </div>
 
     <!-- PROPERTIES PANEL -->
     <div id="panel-props" class="panel">
-      <div class="sec-hdr"><svg width="8" height="8" viewBox="0 0 8 8"><polygon points="4,0 8,8 0,8" fill="currentColor"/></svg>PROPERTIES</div>
+      <div class="sec-hdr">Properties</div>
       <div id="props-content">
         <div class="no-sel">Select an individual<br>to edit properties.<br><br>Use <code>right-click</code> for quick options.<br>Use <code>dbl-click</code> to rename.</div>
       </div>
     </div>
 
+    <!-- STATS PANEL -->
+    <div id="panel-stats" class="panel">
+      <div class="sec-hdr">Statistics</div>
+      <div id="stats-content"></div>
+    </div>
+
     <!-- LEGEND PANEL -->
     <div id="panel-legend" class="panel">
-      <div class="sec-hdr"><svg width="8" height="8" viewBox="0 0 8 8"><polygon points="4,0 8,8 0,8" fill="currentColor"/></svg>LEGEND</div>
+      <div class="sec-hdr">Legend</div>
       <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="#ccc" stroke-width="1.5"/></svg>Male (unaffected)</div>
       <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7.5" fill="none" stroke="#ccc" stroke-width="1.5"/></svg>Female (unaffected)</div>
       <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><path d="M9 1.5L16.5 9L9 16.5L1.5 9Z" fill="none" stroke="#ccc" stroke-width="1.5"/></svg>Unknown gender</div>
-      <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><polygon points="9,4 14,14 4,14" fill="none" stroke="#ccc" stroke-width="1.5"/></svg>Miscarriage / stillbirth</div>
+      <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><polygon points="9,4 14,14 4,14" fill="none" stroke="#ccc" stroke-width="1.5"/></svg>Miscarriage</div>
       <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><rect x="1.5" y="1.5" width="15" height="15" fill="#ccc" stroke="#ccc" stroke-width="1.5"/></svg>Affected</div>
       <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="#ccc" stroke-width="1.5"/><rect x="1.5" y="1.5" width="7.5" height="15" fill="#ccc"/><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="#ccc" stroke-width="1.5"/></svg>Carrier</div>
       <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="#ccc" stroke-width="1.5"/><line x1="1" y1="17" x2="17" y2="1" stroke="#ccc" stroke-width="1.5"/></svg>Deceased</div>
-      <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="#ccc" stroke-width="1.5"/><polygon points="0,14 -4,21 4,21" fill="#4ec9b0" transform="translate(3,-3) rotate(-20,3,14)"/></svg>Propositus</div>
+      <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="#ccc" stroke-width="1.5"/><polygon points="3,14 -1,21 7,21" fill="#4ec9b0" transform="translate(0,-4) rotate(-20,3,14)"/></svg>Propositus</div>
       <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><line x1="1" y1="8" x2="17" y2="8" stroke="#ccc" stroke-width="1.5"/><line x1="1" y1="12" x2="17" y2="12" stroke="#ccc" stroke-width="1.5"/></svg>Consanguineous</div>
       <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><line x1="9" y1="2" x2="3" y2="10" stroke="#ccc" stroke-width="1.5"/><line x1="9" y1="2" x2="15" y2="10" stroke="#ccc" stroke-width="1.5"/><line x1="3" y1="10" x2="15" y2="10" stroke="#ccc" stroke-width="1.5"/></svg>Identical twins</div>
-      <div class="leg-item"><svg class="leg-sym" viewBox="0 0 18 18"><line x1="9" y1="2" x2="3" y2="10" stroke="#ccc" stroke-width="1.5"/><line x1="9" y1="2" x2="15" y2="10" stroke="#ccc" stroke-width="1.5"/></svg>Fraternal twins</div>
     </div>
-
   </div>
 
-  <!-- EDITOR -->
+  <!-- EDITOR (Pedigree Canvas View) -->
   <div id="editor">
     <canvas id="canvas"></canvas>
     <div id="gen-labels"></div>
-    <div id="rename-wrap"><input id="rename-input" type="text" placeholder="Name..." autocomplete="off"></div>
+    <div id="sel-box-el"></div>
+    <div id="rename-wrap"><input id="rename-input" type="text" placeholder="Name…" autocomplete="off"></div>
     <div id="hint">Click a second individual to connect</div>
     <div id="zoom-ctrl">
       <div class="z-btn" onclick="zoomBy(1.2)" title="+">+</div>
-      <div class="z-btn" onclick="resetView()" title="Reset" style="font-size:11px;">⊙</div>
+      <div class="z-btn" onclick="zoomToFit()" title="Fit" style="font-size:11px">⊙</div>
       <div class="z-btn" onclick="zoomBy(0.83)" title="−">−</div>
     </div>
+  </div>
+
+  <!-- PUNNETT SQUARE VIEW -->
+  <div id="punnett-view">
+    <div id="punnett-sidebar">
+      <div class="sec-hdr">Cross Type</div>
+      <div class="pun-tabs">
+        <div class="pun-tab active" id="pun-mono" onclick="setPunMode('mono')">Mono</div>
+        <div class="pun-tab" id="pun-di" onclick="setPunMode('di')">Dihybrid</div>
+        <div class="pun-tab" id="pun-xlink" onclick="setPunMode('xlink')">X-Linked</div>
+        <div class="pun-tab" id="pun-blood" onclick="setPunMode('blood')">Blood Type</div>
+      </div>
+
+      <div id="pun-inputs"></div>
+
+      <div style="padding:5px 8px 0">
+        <button class="full-btn primary" onclick="renderPunnett()">⊞ Generate Grid</button>
+        <button class="full-btn" onclick="exportPunnettPNG()" style="margin-top:3px">⬇ Export PNG</button>
+      </div>
+
+      <div class="info" style="margin-top:6px">
+        <b>How to use</b><br>
+        Enter alleles using capital letters for dominant, lowercase for recessive.<br><br>
+        <b>Examples</b><br>
+        Monohybrid: <kbd>Aa</kbd> × <kbd>Aa</kbd><br>
+        Dihybrid: <kbd>AaBb</kbd> × <kbd>AaBb</kbd><br>
+        X-Linked: Select presets
+      </div>
+    </div>
+    <div id="punnett-main"></div>
   </div>
 
 </div>
@@ -290,7 +382,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 <div id="statusbar">
   <span id="sb-tool">● select</span>
   <span class="sb-sep">|</span>
-  <span id="sb-count">0 individuals</span>
+  <span id="sb-count">0 ind.</span>
+  <span class="sb-sep">|</span>
+  <span id="sb-sel">0 sel.</span>
   <span class="sb-sep">|</span>
   <span id="sb-aff">0 affected</span>
   <span class="sb-sep">|</span>
@@ -300,7 +394,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
     <span class="sb-sep">|</span>
     <span id="sb-pos">x:0 y:0</span>
     <span class="sb-sep">|</span>
-    <span>Rootify</span>
+    <span>Rootify v3</span>
   </div>
 </div>
 
@@ -318,6 +412,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
   <div class="ctx-item" onclick="ctxG('unknown')">◆ Set Unknown</div>
   <div class="ctx-sep"></div>
   <div class="ctx-item" onclick="ctxDup()">⊕ Duplicate</div>
+  <div class="ctx-item" id="ctx-del-rels" onclick="ctxDelRels()" style="display:none">⊗ Delete Relationships</div>
   <div class="ctx-item danger" onclick="ctxDel()">✕ Delete</div>
 </div>
 
@@ -325,304 +420,339 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 <div id="tooltip"></div>
 
 <script>
-// ──────────────────────────────────────────
+// ══════════════════════════════════════════
 // STATE
-// ──────────────────────────────────────────
+// ══════════════════════════════════════════
 const S = {
   individuals:[], relationships:[], nextId:1,
-  selectedId:null, tool:'select',
-  connStep:0, connFirst:null, connType:null, ctxId:null,
+  selectedId:null, selected:new Set(),
+  tool:'select', connStep:0, connFirst:null, connType:null, ctxId:null,
   panX:0, panY:80, scale:1,
   dragging:false, dragId:null, dragOx:0, dragOy:0,
+  dragGroupOffsets:null,
   panning:false, panSx:0, panSy:0, panSpx:0, panSpy:0,
-  mouseW:null, hoverId:null,
+  spaceHeld:false, spacePanning:false, spacePanSx:0, spacePanSy:0, spacePanPx:0, spacePanPy:0,
+  boxSelecting:false, boxSx:0, boxSy:0, boxEx:0, boxEy:0,
+  mouseW:null, hoverId:null, hoverRelId:null, selectedRelId:null,
 };
-let snapOn = true;
-let guidesOn = true;
-const SNAP = 40;
-const R = 20;
+let snapOn=true, guidesOn=true, labelsOn=true, lightTheme=false;
+let searchQuery='';
+const SNAP=40, R=20, YEAR_NOW=2026;
 
 // ── HISTORY ──
-const hist = []; let hIdx = -1;
-function snapshot() {
+const hist=[];let hIdx=-1;
+function snapshot(){
   hist.splice(hIdx+1);
-  hist.push(JSON.stringify({inds:S.individuals, rels:S.relationships, nid:S.nextId}));
-  hIdx = hist.length - 1;
-  if (hist.length > 80) { hist.shift(); hIdx--; }
-  updUndoRedo();
+  hist.push(JSON.stringify({inds:S.individuals,rels:S.relationships,nid:S.nextId}));
+  hIdx=hist.length-1;
+  if(hist.length>80){hist.shift();hIdx--;}
+  updUR();
 }
-function undo() {
-  if (hIdx <= 0) return;
-  hIdx--;
-  restore(hist[hIdx]);
+function undo(){if(hIdx<=0)return;hIdx--;restoreH(hist[hIdx]);}
+function redo(){if(hIdx>=hist.length-1)return;hIdx++;restoreH(hist[hIdx]);}
+function restoreH(s){
+  const d=JSON.parse(s);
+  S.individuals=d.inds;S.relationships=d.rels;S.nextId=d.nid;
+  S.selectedId=null;S.selected=new Set();S.connStep=0;S.connFirst=null;
+  showProps(null);render();
 }
-function redo() {
-  if (hIdx >= hist.length-1) return;
-  hIdx++;
-  restore(hist[hIdx]);
-}
-function restore(s) {
-  const d = JSON.parse(s);
-  S.individuals = d.inds; S.relationships = d.rels; S.nextId = d.nid;
-  S.selectedId = null; S.connStep = 0; S.connFirst = null;
-  showProps(null); render();
-}
-function updUndoRedo() {
-  document.getElementById('undo-btn').disabled = hIdx <= 0;
-  document.getElementById('redo-btn').disabled = hIdx >= hist.length-1;
+function updUR(){
+  document.getElementById('undo-btn').disabled=hIdx<=0;
+  document.getElementById('redo-btn').disabled=hIdx>=hist.length-1;
 }
 
 // ── CANVAS ──
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const editor = document.getElementById('editor');
-function resize() { canvas.width=editor.clientWidth; canvas.height=editor.clientHeight; render(); }
-window.addEventListener('resize', resize);
-setTimeout(()=>{ S.panX=editor.clientWidth/2-100; resize(); snapshot(); }, 60);
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+const editor=document.getElementById('editor');
+function resize(){canvas.width=editor.clientWidth;canvas.height=editor.clientHeight;render();}
+window.addEventListener('resize',resize);
+setTimeout(()=>{S.panX=editor.clientWidth/2-100;resize();snapshot();},60);
 
 // ── COORD ──
-const s2w=(sx,sy)=>({x:(sx-S.panX)/S.scale, y:(sy-S.panY)/S.scale});
-const w2s=(wx,wy)=>({x:wx*S.scale+S.panX, y:wy*S.scale+S.panY});
+const s2w=(sx,sy)=>({x:(sx-S.panX)/S.scale,y:(sy-S.panY)/S.scale});
+const w2s=(wx,wy)=>({x:wx*S.scale+S.panX,y:wy*S.scale+S.panY});
 const cpos=e=>{const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};};
 const snapV=v=>snapOn?Math.round(v/SNAP)*SNAP:v;
 
 // ── RENDER ──
-function render() {
+function render(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.save();
   ctx.translate(S.panX,S.panY);
   ctx.scale(S.scale,S.scale);
-  if (guidesOn) drawGuides();
+  if(guidesOn)drawGuides();
   S.relationships.forEach(drawRel);
   S.individuals.forEach(drawInd);
-  if (S.connStep===1 && S.mouseW) {
+  if(S.connStep===1&&S.mouseW){
     const f=S.individuals.find(i=>i.id===S.connFirst);
-    if (f) {
-      ctx.save(); ctx.setLineDash([5,4]);
-      ctx.strokeStyle='rgba(0,122,204,.5)'; ctx.lineWidth=1.5/S.scale;
-      ctx.beginPath(); ctx.moveTo(f.x,f.y); ctx.lineTo(S.mouseW.x,S.mouseW.y); ctx.stroke();
-      ctx.restore();
-    }
+    if(f){ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle='rgba(0,122,204,.5)';ctx.lineWidth=1.5/S.scale;ctx.beginPath();ctx.moveTo(f.x,f.y);ctx.lineTo(S.mouseW.x,S.mouseW.y);ctx.stroke();ctx.restore();}
   }
   ctx.restore();
+  drawSelBox();
   updateGenLabels();
   updateStatus();
 }
 
-// ── GUIDE LINES ──
-function drawGuides() {
-  if (!S.individuals.length) return;
-  const bands=[];
-  S.individuals.forEach(ind=>{
-    let f=bands.find(b=>Math.abs(ind.y-b.y)<55);
-    if(!f){f={y:ind.y};bands.push(f);}
-  });
+function drawGuides(){
+  if(!S.individuals.length)return;
+  const bands=getBands();
   ctx.save();
   bands.forEach(b=>{
-    ctx.fillStyle='rgba(255,255,255,.018)';
+    ctx.fillStyle=lightTheme?'rgba(0,0,0,.025)':'rgba(255,255,255,.018)';
     ctx.fillRect(-50000,b.y-42,100000,84);
-    ctx.strokeStyle='rgba(255,255,255,.04)';
-    ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(-50000,b.y-42); ctx.lineTo(50000,b.y-42); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-50000,b.y+42); ctx.lineTo(50000,b.y+42); ctx.stroke();
+    ctx.strokeStyle=lightTheme?'rgba(0,0,0,.06)':'rgba(255,255,255,.04)';
+    ctx.lineWidth=.8;
+    ctx.beginPath();ctx.moveTo(-50000,b.y-42);ctx.lineTo(50000,b.y-42);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-50000,b.y+42);ctx.lineTo(50000,b.y+42);ctx.stroke();
   });
   ctx.restore();
 }
 
 // ── DRAW INDIVIDUAL ──
-function drawInd(ind) {
-  const {x,y,gender,affected,carrier,deceased,propositus,id} = ind;
-  const sel=S.selectedId===id, first=S.connFirst===id, hov=S.hoverId===id;
-  const sc= sel?'#007acc': first?'#4ec9b0': hov?'#5a7a8a':'#d4d4d4';
-  const sw= (sel||first)?2.5:1.5;
-  const fc= affected?'#d4d4d4':'transparent';
+function drawInd(ind){
+  const{x,y,gender,affected,carrier,deceased,propositus,id}=ind;
+  const sel=S.selected.has(id)||S.selectedId===id;
+  const pri=S.selectedId===id;
+  const first=S.connFirst===id;
+  const hov=S.hoverId===id;
+  const srch=searchQuery&&(ind.name||ind.label||'').toLowerCase().includes(searchQuery.toLowerCase());
+  const sc=pri?'#007acc':sel?'#3a9fd6':first?'#4ec9b0':srch?'#dcdcaa':hov?'#5a7a8a':'#d4d4d4';
+  const sw=(sel||first)?2.5:1.5;
+  const fc=affected?(ind.traitColor||'#d4d4d4'):'transparent';
 
   ctx.save();
-  if (sel||first) { ctx.shadowColor=sel?'#007acc':'#4ec9b0'; ctx.shadowBlur=14; }
+  if(sel||first){ctx.shadowColor=pri?'#007acc':first?'#4ec9b0':'#3a9fd6';ctx.shadowBlur=14;}
+  if(srch){ctx.shadowColor='#dcdcaa';ctx.shadowBlur=18;}
 
-  ctx.strokeStyle=sc; ctx.lineWidth=sw; ctx.fillStyle=fc;
+  ctx.strokeStyle=sc;ctx.lineWidth=sw;ctx.fillStyle=fc;
 
-  if (gender==='male') drawSq(x,y,R,carrier&&!affected);
-  else if (gender==='female') drawCir(x,y,R,carrier&&!affected);
-  else if (gender==='unknown') drawDia(x,y,R,carrier&&!affected);
-  else if (gender==='miscarriage') drawTri(x,y,R*0.7);
-
+  if(gender==='male')drawSq(x,y,R,carrier&&!affected);
+  else if(gender==='female')drawCir(x,y,R,carrier&&!affected);
+  else if(gender==='unknown')drawDia(x,y,R,carrier&&!affected);
+  else if(gender==='miscarriage')drawTri(x,y,R*0.7);
   ctx.shadowBlur=0;
 
-  if (deceased) {
-    ctx.strokeStyle=sc; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(x-R-5,y+R+5); ctx.lineTo(x+R+5,y-R-5); ctx.stroke();
+  if(deceased){ctx.strokeStyle=sc;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x-R-5,y+R+5);ctx.lineTo(x+R+5,y-R-5);ctx.stroke();}
+  if(propositus){
+    const ax=x-R-26,ay=y+R+16,tx2=x-R-2,ty=y+2,ang=Math.atan2(ty-ay,tx2-ax);
+    ctx.strokeStyle='#4ec9b0';ctx.fillStyle='#4ec9b0';ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(tx2,ty);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tx2,ty);ctx.lineTo(tx2-9*Math.cos(ang-.45),ty-9*Math.sin(ang-.45));ctx.lineTo(tx2-9*Math.cos(ang+.45),ty-9*Math.sin(ang+.45));ctx.closePath();ctx.fill();
   }
-  if (propositus) {
-    const ax=x-R-26,ay=y+R+16,tx2=x-R-2,ty=y+2;
-    const ang=Math.atan2(ty-ay,tx2-ax);
-    ctx.strokeStyle='#4ec9b0'; ctx.fillStyle='#4ec9b0'; ctx.lineWidth=1.8;
-    ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(tx2,ty); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(tx2,ty);
-    ctx.lineTo(tx2-9*Math.cos(ang-.45),ty-9*Math.sin(ang-.45));
-    ctx.lineTo(tx2-9*Math.cos(ang+.45),ty-9*Math.sin(ang+.45));
-    ctx.closePath(); ctx.fill();
+  // Notes indicator dot
+  if(ind.notes){
+    const nr=gender==='miscarriage'?R*.7:R;
+    ctx.fillStyle='#4ec9b0';ctx.beginPath();ctx.arc(x+nr*.7,y-nr*.7,3.5,0,Math.PI*2);ctx.fill();
   }
 
-  // Name label
-  const lbl = ind.name || ind.label;
-  if (lbl) {
-    const symR = gender==='miscarriage' ? R*0.7 : R;
-    ctx.fillStyle='#7a8894'; ctx.font='10px JetBrains Mono,Consolas,monospace';
-    ctx.textAlign='center'; ctx.fillText(lbl,x,y+symR+15);
-  }
-  // Birth year sub-label
-  if (ind.year) {
-    const symR = gender==='miscarriage' ? R*0.7 : R;
-    ctx.fillStyle='#4a5568'; ctx.font='9px JetBrains Mono,Consolas,monospace';
-    ctx.textAlign='center'; ctx.fillText('b.'+ind.year,x,y+symR+26);
+  if(labelsOn){
+    const lbl=ind.name||ind.label;
+    const nr=gender==='miscarriage'?R*.7:R;
+    if(lbl){ctx.fillStyle=lightTheme?'#555':'#7a8894';ctx.font='10px JetBrains Mono,Consolas,monospace';ctx.textAlign='center';ctx.fillText(lbl,x,y+nr+15);}
+    // Age from birth year
+    if(ind.year){
+      const age=YEAR_NOW-parseInt(ind.year);
+      const ageStr=age>0&&age<150?`b.${ind.year} (${age})`:`b.${ind.year}`;
+      ctx.fillStyle='#4a5568';ctx.font='9px JetBrains Mono,Consolas,monospace';ctx.textAlign='center';ctx.fillText(ageStr,x,y+nr+26);
+    }
   }
   ctx.restore();
 }
 
-function drawSq(x,y,r,carrier) {
-  if (carrier) {
-    ctx.fillStyle='transparent'; ctx.fillRect(x-r,y-r,r*2,r*2); ctx.strokeRect(x-r,y-r,r*2,r*2);
-    ctx.fillStyle='#d4d4d4'; ctx.fillRect(x-r,y-r,r,r*2); ctx.strokeRect(x-r,y-r,r*2,r*2);
-  } else { ctx.fillRect(x-r,y-r,r*2,r*2); ctx.strokeRect(x-r,y-r,r*2,r*2); }
+function drawSq(x,y,r,carrier){
+  if(carrier){ctx.fillStyle='transparent';ctx.fillRect(x-r,y-r,r*2,r*2);ctx.strokeRect(x-r,y-r,r*2,r*2);ctx.fillStyle=ctx.strokeStyle==='#d4d4d4'?'#d4d4d4':ctx.strokeStyle;ctx.fillRect(x-r,y-r,r,r*2);ctx.strokeRect(x-r,y-r,r*2,r*2);}
+  else{ctx.fillRect(x-r,y-r,r*2,r*2);ctx.strokeRect(x-r,y-r,r*2,r*2);}
 }
-function drawCir(x,y,r,carrier) {
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-  if (carrier) {
-    ctx.stroke(); ctx.save(); ctx.beginPath(); ctx.rect(x-r,y-r,r,r*2); ctx.clip();
-    ctx.fillStyle='#d4d4d4'; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-    ctx.restore(); ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke();
-  } else { ctx.fill(); ctx.stroke(); }
+function drawCir(x,y,r,carrier){
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+  if(carrier){ctx.stroke();ctx.save();ctx.beginPath();ctx.rect(x-r,y-r,r,r*2);ctx.clip();ctx.fillStyle='#d4d4d4';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.restore();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();}
+  else{ctx.fill();ctx.stroke();}
 }
-function drawDia(x,y,r,carrier) {
-  const path=()=>{ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r,y);ctx.closePath();};
-  if (carrier) {
-    path(); ctx.stroke(); ctx.save(); ctx.beginPath(); ctx.rect(x-r,y-r,r,r*2); ctx.clip();
-    ctx.fillStyle='#d4d4d4'; path(); ctx.fill(); ctx.restore(); path(); ctx.stroke();
-  } else { path(); ctx.fill(); ctx.stroke(); }
+function drawDia(x,y,r,carrier){
+  const p=()=>{ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r,y);ctx.closePath();};
+  if(carrier){p();ctx.stroke();ctx.save();ctx.beginPath();ctx.rect(x-r,y-r,r,r*2);ctx.clip();ctx.fillStyle='#d4d4d4';p();ctx.fill();ctx.restore();p();ctx.stroke();}
+  else{p();ctx.fill();ctx.stroke();}
 }
-function drawTri(x,y,r) {
-  ctx.fillStyle='#d4d4d4';
-  ctx.beginPath(); ctx.moveTo(x,y+r); ctx.lineTo(x-r,y-r); ctx.lineTo(x+r,y-r); ctx.closePath();
-  ctx.fill(); ctx.stroke();
-}
+function drawTri(x,y,r){ctx.fillStyle='#d4d4d4';ctx.beginPath();ctx.moveTo(x,y+r);ctx.lineTo(x-r,y-r);ctx.lineTo(x+r,y-r);ctx.closePath();ctx.fill();ctx.stroke();}
 
 // ── DRAW RELATIONSHIP ──
-function drawRel(rel) {
-  ctx.save(); ctx.strokeStyle='#d4d4d4'; ctx.lineWidth=1.5; ctx.setLineDash([]);
+function drawRel(rel){
+  const isSelRel=S.selectedRelId===rel.id;
+  const isHovRel=S.hoverRelId===rel.id;
+  ctx.save();
+  ctx.strokeStyle=isSelRel?'#007acc':isHovRel?'#5a9fd6':'#d4d4d4';
+  ctx.lineWidth=isSelRel?2.5:1.5;
+  if(isSelRel){ctx.shadowColor='#007acc';ctx.shadowBlur=8;}
+  ctx.setLineDash([]);
   const get=id=>S.individuals.find(i=>i.id===id);
 
-  if (rel.type==='marriage'||rel.type==='consanguineous') {
-    const p1=get(rel.ids[0]),p2=get(rel.ids[1]);
-    if(!p1||!p2){ctx.restore();return;}
-    const lx=Math.min(p1.x,p2.x)+R, rx=Math.max(p1.x,p2.x)-R, my=(p1.y+p2.y)/2;
-    if (rel.type==='consanguineous') {
-      ctx.beginPath();ctx.moveTo(lx,my-2.5);ctx.lineTo(rx,my-2.5);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(lx,my+2.5);ctx.lineTo(rx,my+2.5);ctx.stroke();
-    } else { ctx.beginPath();ctx.moveTo(lx,my);ctx.lineTo(rx,my);ctx.stroke(); }
-  } else if (rel.type==='child') {
-    if (rel.ids.length===3) {
-      const p1=get(rel.ids[0]),p2=get(rel.ids[1]),ch=get(rel.ids[2]);
-      if(!p1||!p2||!ch){ctx.restore();return;}
-      const mx=(p1.x+p2.x)/2, pmy=(p1.y+p2.y)/2;
-      const dy=pmy+Math.max(40,(ch.y-R-pmy)*0.4);
+  if(rel.type==='marriage'||rel.type==='consanguineous'){
+    const p1=get(rel.ids[0]),p2=get(rel.ids[1]);if(!p1||!p2){ctx.restore();return;}
+    const lx=Math.min(p1.x,p2.x)+R,rx=Math.max(p1.x,p2.x)-R,my=(p1.y+p2.y)/2;
+    if(rel.type==='consanguineous'){ctx.beginPath();ctx.moveTo(lx,my-2.5);ctx.lineTo(rx,my-2.5);ctx.stroke();ctx.beginPath();ctx.moveTo(lx,my+2.5);ctx.lineTo(rx,my+2.5);ctx.stroke();}
+    else{ctx.beginPath();ctx.moveTo(lx,my);ctx.lineTo(rx,my);ctx.stroke();}
+  } else if(rel.type==='child'){
+    if(rel.ids.length===3){
+      const p1=get(rel.ids[0]),p2=get(rel.ids[1]),ch=get(rel.ids[2]);if(!p1||!p2||!ch){ctx.restore();return;}
+      const mx=(p1.x+p2.x)/2,pmy=(p1.y+p2.y)/2,dy=pmy+Math.max(40,(ch.y-R-pmy)*.4);
       ctx.beginPath();ctx.moveTo(mx,pmy);ctx.lineTo(mx,dy);ctx.stroke();
       ctx.beginPath();ctx.moveTo(mx,dy);ctx.lineTo(ch.x,dy);ctx.stroke();
       ctx.beginPath();ctx.moveTo(ch.x,dy);ctx.lineTo(ch.x,ch.y-R);ctx.stroke();
-    } else {
-      const par=get(rel.ids[0]),ch=get(rel.ids[1]);
-      if(!par||!ch){ctx.restore();return;}
+    }else{
+      const par=get(rel.ids[0]),ch=get(rel.ids[1]);if(!par||!ch){ctx.restore();return;}
       const my2=(par.y+R+ch.y-R)/2;
       ctx.beginPath();ctx.moveTo(par.x,par.y+R);ctx.lineTo(par.x,my2);ctx.lineTo(ch.x,my2);ctx.lineTo(ch.x,ch.y-R);ctx.stroke();
     }
-  } else if (rel.type==='twin') {
-    const c1=get(rel.ids[0]),c2=get(rel.ids[1]);
-    if(!c1||!c2){ctx.restore();return;}
-    const mx=(c1.x+c2.x)/2, topY=Math.min(c1.y,c2.y)-R-28;
+  } else if(rel.type==='twin'){
+    const c1=get(rel.ids[0]),c2=get(rel.ids[1]);if(!c1||!c2){ctx.restore();return;}
+    const mx=(c1.x+c2.x)/2,topY=Math.min(c1.y,c2.y)-R-28;
     ctx.beginPath();ctx.moveTo(mx,topY);ctx.lineTo(c1.x,c1.y-R);ctx.stroke();
     ctx.beginPath();ctx.moveTo(mx,topY);ctx.lineTo(c2.x,c2.y-R);ctx.stroke();
-    if (rel.identical) {
-      ctx.beginPath();ctx.moveTo(c1.x,topY+(c1.y-R-topY)/2);ctx.lineTo(c2.x,topY+(c2.y-R-topY)/2);ctx.stroke();
-    }
+    if(rel.identical){ctx.beginPath();ctx.moveTo(c1.x,topY+(c1.y-R-topY)/2);ctx.lineTo(c2.x,topY+(c2.y-R-topY)/2);ctx.stroke();}
   }
   ctx.restore();
+}
+
+// ── SELECTION BOX ──
+function drawSelBox(){
+  const el=document.getElementById('sel-box-el');
+  if(!S.boxSelecting){el.style.display='none';return;}
+  const sx=Math.min(S.boxSx,S.boxEx),sy=Math.min(S.boxSy,S.boxEy);
+  const w=Math.abs(S.boxEx-S.boxSx),h=Math.abs(S.boxEy-S.boxSy);
+  el.style.display='block';el.style.left=sx+'px';el.style.top=sy+'px';
+  el.style.width=w+'px';el.style.height=h+'px';
 }
 
 // ── GEN LABELS ──
 const ROMAN=n=>{const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1],s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];let r='';for(let i=0;i<v.length;i++)while(n>=v[i]){r+=s[i];n-=v[i];}return r;};
-function updateGenLabels() {
-  const c=document.getElementById('gen-labels'); c.innerHTML='';
-  if (!S.individuals.length) return;
+function getBands(){
   const bands=[];
-  S.individuals.forEach(ind=>{
-    let f=bands.find(b=>Math.abs(ind.y-b.y)<55);
-    if(!f){f={y:ind.y,members:[]};bands.push(f);}
-    f.members.push(ind);
-  });
-  bands.sort((a,b)=>a.y-b.y);
+  S.individuals.forEach(ind=>{let f=bands.find(b=>Math.abs(ind.y-b.y)<55);if(!f){f={y:ind.y,members:[]};bands.push(f);}f.members.push(ind);});
+  return bands.sort((a,b)=>a.y-b.y);
+}
+function updateGenLabels(){
+  const c=document.getElementById('gen-labels');c.innerHTML='';
+  if(!S.individuals.length)return;
+  const bands=getBands();
   bands.forEach((band,gi)=>{
     band.members.sort((a,b)=>a.x-b.x);
     band.members.forEach((ind,ni)=>{ind.label=`${ROMAN(gi+1)}-${ni+1}`;});
     const sy=band.y*S.scale+S.panY;
     const el=document.createElement('div');
     el.className='gen-label';
-    el.textContent=ROMAN(gi+1);
+    el.textContent=`${ROMAN(gi+1)} (${band.members.length})`;
     el.style.top=sy+'px';
     el.style.fontSize=Math.max(10,Math.min(14,12*S.scale))+'px';
+    el.style.opacity=labelsOn?'1':'0.3';
     c.appendChild(el);
   });
 }
-
-function updateStatus() {
+function updateStatus(){
   const aff=S.individuals.filter(i=>i.affected).length;
   const car=S.individuals.filter(i=>i.carrier).length;
+  const selCnt=S.selected.size+(S.selectedId&&!S.selected.has(S.selectedId)?1:0);
   document.getElementById('sb-tool').textContent='● '+S.tool;
   document.getElementById('sb-count').textContent=S.individuals.length+' ind.';
+  document.getElementById('sb-sel').textContent=selCnt+' sel.';
   document.getElementById('sb-aff').textContent=aff+' affected';
   document.getElementById('sb-car').textContent=car+' carrier'+(car!==1?'s':'');
   document.getElementById('sb-zoom').textContent=Math.round(S.scale*100)+'%';
 }
 
+// ── STATISTICS PANEL ──
+function buildStats(){
+  const el=document.getElementById('stats-content');
+  if(!S.individuals.length){el.innerHTML='<div class="no-sel">No individuals on canvas.</div>';return;}
+  const bands=getBands();
+  const n=S.individuals.length;
+  const aff=S.individuals.filter(i=>i.affected).length;
+  const car=S.individuals.filter(i=>i.carrier).length;
+  const dec=S.individuals.filter(i=>i.deceased).length;
+  const male=S.individuals.filter(i=>i.gender==='male').length;
+  const female=S.individuals.filter(i=>i.gender==='female').length;
+  const prop=S.individuals.filter(i=>i.propositus).length;
+  const pct=(v,t)=>t?Math.round(v/t*100)+'%':'—';
+  const bar=(v,t,c)=>`<div class="stat-bar-wrap"><div class="stat-bar" style="width:${t?v/t*100:0}%;background:${c}"></div></div>`;
+  el.innerHTML=`
+    <div class="stat-row"><span class="stat-k">Individuals</span><span class="stat-v">${n}</span></div>
+    <div class="stat-row"><span class="stat-k">Generations</span><span class="stat-v">${bands.length}</span></div>
+    <div class="stat-row"><span class="stat-k">Relationships</span><span class="stat-v">${S.relationships.length}</span></div>
+    <div class="stat-row"><span class="stat-k">Affected</span><span class="stat-v">${aff} (${pct(aff,n)})</span></div>
+    ${bar(aff,n,'#569cd6')}
+    <div class="stat-row"><span class="stat-k">Carriers</span><span class="stat-v">${car} (${pct(car,n)})</span></div>
+    ${bar(car,n,'#4ec9b0')}
+    <div class="stat-row"><span class="stat-k">Deceased</span><span class="stat-v">${dec} (${pct(dec,n)})</span></div>
+    <div class="stat-row"><span class="stat-k">Male</span><span class="stat-v">${male} (${pct(male,n)})</span></div>
+    ${bar(male,n,'#569cd6')}
+    <div class="stat-row"><span class="stat-k">Female</span><span class="stat-v">${female} (${pct(female,n)})</span></div>
+    ${bar(female,n,'#ce9178')}
+    <div class="stat-row"><span class="stat-k">Propositus</span><span class="stat-v">${prop}</span></div>
+    <div class="stat-row"><span class="stat-k">Unaffected</span><span class="stat-v">${n-aff-car} (${pct(n-aff-car,n)})</span></div>
+    ${bands.map((b,i)=>`<div class="stat-row"><span class="stat-k">Gen ${ROMAN(i+1)}</span><span class="stat-v">${b.members.length} ind.</span></div>`).join('')}
+  `;
+}
+
 // ── HIT TEST ──
-function hit(wx,wy) {
-  for (let i=S.individuals.length-1;i>=0;i--) {
+function hit(wx,wy){
+  for(let i=S.individuals.length-1;i>=0;i--){
     const ind=S.individuals[i];
-    if (ind.gender==='female') { if(Math.hypot(wx-ind.x,wy-ind.y)<=R+3) return ind.id; }
-    else if (ind.gender==='miscarriage') { if(Math.hypot(wx-ind.x,wy-ind.y)<=R*0.7+3) return ind.id; }
-    else { if(Math.abs(wx-ind.x)<=R+3&&Math.abs(wy-ind.y)<=R+3) return ind.id; }
+    if(ind.gender==='female'){if(Math.hypot(wx-ind.x,wy-ind.y)<=R+3)return ind.id;}
+    else if(ind.gender==='miscarriage'){if(Math.hypot(wx-ind.x,wy-ind.y)<=R*.7+3)return ind.id;}
+    else{if(Math.abs(wx-ind.x)<=R+3&&Math.abs(wy-ind.y)<=R+3)return ind.id;}
+  }
+  return null;
+}
+
+// Hit test for relationship lines
+function hitRel(wx,wy){
+  const get=id=>S.individuals.find(i=>i.id===id);
+  const ptLineDist=(px,py,x1,y1,x2,y2)=>{
+    const dx=x2-x1,dy=y2-y1,len2=dx*dx+dy*dy;
+    if(len2===0)return Math.hypot(px-x1,py-y1);
+    const t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/len2));
+    return Math.hypot(px-x1-t*dx,py-y1-t*dy);
+  };
+  const THRESH=7;
+  for(let i=S.relationships.length-1;i>=0;i--){
+    const rel=S.relationships[i];
+    if(rel.type==='marriage'||rel.type==='consanguineous'){
+      const p1=get(rel.ids[0]),p2=get(rel.ids[1]);if(!p1||!p2)continue;
+      const lx=Math.min(p1.x,p2.x)+R,rx=Math.max(p1.x,p2.x)-R,my=(p1.y+p2.y)/2;
+      if(ptLineDist(wx,wy,lx,my,rx,my)<THRESH)return rel.id;
+    }
   }
   return null;
 }
 
 // ── TOOL ──
-function setTool(t) {
-  S.tool=t; S.connStep=0; S.connFirst=null;
+function setTool(t){
+  S.tool=t;S.connStep=0;S.connFirst=null;
   document.getElementById('hint').style.display='none';
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
-  const b=document.getElementById('tb-'+t); if(b) b.classList.add('active');
+  const b=document.getElementById('tb-'+t);if(b)b.classList.add('active');
   render();
 }
 
 // ── ADD INDIVIDUAL ──
-function addInd(wx,wy,gender) {
-  const ind={id:S.nextId++,x:snapV(wx),y:snapV(wy),gender,affected:false,carrier:false,deceased:false,propositus:false,label:'',name:'',year:'',notes:''};
-  S.individuals.push(ind);
-  return ind;
+function addInd(wx,wy,gender){
+  const ind={id:S.nextId++,x:snapV(wx),y:snapV(wy),gender,affected:false,carrier:false,deceased:false,propositus:false,label:'',name:'',year:'',notes:'',traitColor:''};
+  S.individuals.push(ind);return ind;
 }
 
 // ── CONNECT ──
-function connect(id1,id2,type) {
-  if (type==='marry') {
+function connect(id1,id2,type){
+  if(type==='marry'){
     if(S.relationships.some(r=>(r.type==='marriage'||r.type==='consanguineous')&&r.ids.includes(id1)&&r.ids.includes(id2)))return;
     S.relationships.push({id:S.nextId++,type:'marriage',ids:[id1,id2]});
-  } else if (type==='consang') {
+  }else if(type==='consang'){
     if(S.relationships.some(r=>r.type==='consanguineous'&&r.ids.includes(id1)&&r.ids.includes(id2)))return;
     S.relationships.push({id:S.nextId++,type:'consanguineous',ids:[id1,id2]});
-  } else if (type==='child') {
+  }else if(type==='child'){
     const mar=S.relationships.find(r=>(r.type==='marriage'||r.type==='consanguineous')&&r.ids.includes(id1));
-    if (mar) { const other=mar.ids.find(i=>i!==id1); S.relationships.push({id:S.nextId++,type:'child',ids:[id1,other,id2]}); }
-    else { S.relationships.push({id:S.nextId++,type:'child',ids:[id1,id2]}); }
-  } else if (type==='twin') {
+    if(mar){const other=mar.ids.find(i=>i!==id1);S.relationships.push({id:S.nextId++,type:'child',ids:[id1,other,id2]});}
+    else{S.relationships.push({id:S.nextId++,type:'child',ids:[id1,id2]});}
+  }else if(type==='twin'){
     if(S.relationships.some(r=>r.type==='twin'&&r.ids.includes(id1)&&r.ids.includes(id2)))return;
     const identical=confirm('Identical twins? OK = Identical, Cancel = Fraternal');
     S.relationships.push({id:S.nextId++,type:'twin',ids:[id1,id2],identical});
@@ -630,196 +760,254 @@ function connect(id1,id2,type) {
 }
 
 // ── DUPLICATE ──
-function duplicate(id) {
-  const src=S.individuals.find(i=>i.id===id);
-  if (!src) return;
+function duplicate(id){
+  const src=S.individuals.find(i=>i.id===id);if(!src)return;
   snapshot();
-  const n={...src,id:S.nextId++,x:snapV(src.x+50),y:snapV(src.y+50),label:'',name:src.name?src.name+' (copy)':''};
-  S.individuals.push(n);
-  S.selectedId=n.id;
-  showProps(n.id);
+  const n={...src,id:S.nextId++,x:snapV(src.x+60),y:snapV(src.y+60),label:'',name:src.name?(src.name+' (copy)'):''};
+  S.individuals.push(n);S.selectedId=n.id;showProps(n.id);render();
+}
+
+// ── SELECT ALL ──
+function selectAll(){
+  S.selected=new Set(S.individuals.map(i=>i.id));
+  S.selectedId=S.individuals.length?S.individuals[0].id:null;
   render();
 }
 
-// ── AUTO-ARRANGE ──
-function autoArrange() {
-  if (!S.individuals.length) return;
+// ── DELETE SELECTION ──
+function deleteSelected(){
+  const ids=[...S.selected];if(S.selectedId&&!S.selected.has(S.selectedId))ids.push(S.selectedId);
+  if(!ids.length)return;
   snapshot();
-  const bands=[];
-  S.individuals.forEach(ind=>{
-    let f=bands.find(b=>Math.abs(ind.y-b.y)<80);
-    if(!f){f={y:ind.y,members:[]};bands.push(f);}
-    f.members.push(ind);
+  ids.forEach(id=>{
+    S.individuals=S.individuals.filter(i=>i.id!==id);
+    S.relationships=S.relationships.filter(r=>!r.ids.includes(id));
   });
-  bands.sort((a,b)=>a.y-b.y);
-  const iSp=120, gSp=140, startY=100;
-  bands.forEach((band,gi)=>{
-    band.members.sort((a,b)=>a.x-b.x);
-    const tw=(band.members.length-1)*iSp;
-    band.members.forEach((ind,ni)=>{
-      ind.x = -tw/2 + ni*iSp;
-      ind.y = startY + gi*gSp;
-    });
-  });
-  render();
-}
-
-// ── TOGGLE SNAP / GUIDES ──
-function toggleSnap() {
-  snapOn=!snapOn;
-  document.getElementById('snap-btn').classList.toggle('on',snapOn);
-}
-function toggleGuides() {
-  guidesOn=!guidesOn;
-  document.getElementById('guide-btn').classList.toggle('on',guidesOn);
-  render();
+  S.selected=new Set();S.selectedId=null;showProps(null);render();
 }
 
 // ── ZOOM ──
-function zoomBy(f) {
-  const cx=canvas.width/2, cy=canvas.height/2;
-  const ns=Math.max(.15,Math.min(5,S.scale*f));
-  S.panX=cx-(cx-S.panX)*(ns/S.scale);
-  S.panY=cy-(cy-S.panY)*(ns/S.scale);
-  S.scale=ns; render();
+function zoomBy(f,cx,cy){
+  if(cx===undefined){cx=canvas.width/2;cy=canvas.height/2;}
+  const ns=Math.max(.1,Math.min(5,S.scale*f));
+  S.panX=cx-(cx-S.panX)*(ns/S.scale);S.panY=cy-(cy-S.panY)*(ns/S.scale);
+  S.scale=ns;render();
 }
-function resetView() { S.panX=editor.clientWidth/2-100; S.panY=80; S.scale=1; render(); }
+function zoomToFit(){
+  if(!S.individuals.length)return;
+  let mx=Infinity,my=Infinity,Mx=-Infinity,My=-Infinity;
+  S.individuals.forEach(i=>{mx=Math.min(mx,i.x-R-40);my=Math.min(my,i.y-R-40);Mx=Math.max(Mx,i.x+R+40);My=Math.max(My,i.y+R+40);});
+  const W=Mx-mx,H=My-my;
+  const sc=Math.min(.95*canvas.width/W,.95*canvas.height/H,3);
+  S.scale=sc;S.panX=(canvas.width-W*sc)/2-mx*sc;S.panY=(canvas.height-H*sc)/2-my*sc;render();
+}
+function zoomToSel(){
+  const ids=[...S.selected];if(S.selectedId)ids.push(S.selectedId);
+  const sel=S.individuals.filter(i=>ids.includes(i.id));
+  if(!sel.length){zoomToFit();return;}
+  let mx=Infinity,my=Infinity,Mx=-Infinity,My=-Infinity;
+  sel.forEach(i=>{mx=Math.min(mx,i.x-R-60);my=Math.min(my,i.y-R-60);Mx=Math.max(Mx,i.x+R+60);My=Math.max(My,i.y+R+60);});
+  const W=Mx-mx,H=My-my;
+  const sc=Math.min(.9*canvas.width/W,.9*canvas.height/H,3);
+  S.scale=sc;S.panX=(canvas.width-W*sc)/2-mx*sc;S.panY=(canvas.height-H*sc)/2-my*sc;render();
+}
+function resetView(){S.panX=editor.clientWidth/2-100;S.panY=80;S.scale=1;render();}
+
+// ── SEARCH ──
+function onSearch(v){searchQuery=v;render();}
+
+// ── AUTO-ARRANGE ──
+function autoArrange(){
+  if(!S.individuals.length)return;snapshot();
+  const bands=getBands();
+  const iSp=120,gSp=140,startY=100;
+  bands.forEach((band,gi)=>{
+    band.members.sort((a,b)=>a.x-b.x);
+    const tw=(band.members.length-1)*iSp;
+    band.members.forEach((ind,ni)=>{ind.x=-tw/2+ni*iSp;ind.y=startY+gi*gSp;});
+  });
+  render();
+}
+
+// ── TOGGLE HELPERS ──
+function toggleSnap(){snapOn=!snapOn;document.getElementById('snap-btn').classList.toggle('on',snapOn);}
+function toggleGuides(){guidesOn=!guidesOn;document.getElementById('guide-btn').classList.toggle('on',guidesOn);render();}
+function toggleLabels(){labelsOn=!labelsOn;document.getElementById('lbl-btn').classList.toggle('on',labelsOn);render();}
+function toggleTheme(){
+  lightTheme=!lightTheme;
+  document.body.classList.toggle('light',lightTheme);
+  document.getElementById('theme-btn').classList.toggle('on',lightTheme);
+  render();
+}
+
+// ── SAVE / LOAD JSON ──
+function saveJSON(){
+  const data={individuals:S.individuals,relationships:S.relationships,nextId:S.nextId};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rootify-pedigree.json';a.click();
+}
+function loadJSON(ev){
+  const f=ev.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(d.individuals&&d.relationships){
+        snapshot();
+        S.individuals=d.individuals;S.relationships=d.relationships;S.nextId=d.nextId||S.nextId;
+        S.selectedId=null;S.selected=new Set();showProps(null);render();
+      }
+    }catch(err){alert('Invalid Rootify JSON file.');}
+    ev.target.value='';
+  };
+  r.readAsText(f);
+}
 
 // ── RENAME DIALOG ──
 const renameInput=document.getElementById('rename-input');
 const renameWrap=document.getElementById('rename-wrap');
 let renameId=null;
-
-function openRename(id, sx, sy) {
-  renameId=id;
-  const ind=S.individuals.find(i=>i.id===id);
+function openRename(id,sx,sy){
+  renameId=id;const ind=S.individuals.find(i=>i.id===id);
   renameInput.value=ind.name||'';
-  renameWrap.style.display='block';
-  renameWrap.style.left=(sx-60)+'px';
-  renameWrap.style.top=(sy-18)+'px';
-  renameInput.focus(); renameInput.select();
+  renameWrap.style.display='block';renameWrap.style.left=(sx-60)+'px';renameWrap.style.top=(sy-18)+'px';
+  renameInput.focus();renameInput.select();
 }
-function commitRename() {
-  if (renameId!==null) {
-    snapshot();
-    const ind=S.individuals.find(i=>i.id===renameId);
-    if (ind) ind.name=renameInput.value.trim();
-    renameId=null; renameWrap.style.display='none';
-    showProps(S.selectedId); render();
+function commitRename(){
+  if(renameId!==null){
+    snapshot();const ind=S.individuals.find(i=>i.id===renameId);
+    if(ind)ind.name=renameInput.value.trim();
+    renameId=null;renameWrap.style.display='none';showProps(S.selectedId);render();
   }
 }
-renameInput.addEventListener('keydown',e=>{
-  if(e.key==='Enter'||e.key==='Escape'){commitRename();e.preventDefault();}
-});
+renameInput.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key==='Escape'){commitRename();e.preventDefault();}});
 renameInput.addEventListener('blur',commitRename);
 
 // ── TOOLTIP ──
 const tooltip=document.getElementById('tooltip');
 let tooltipTimer=null;
-function showTooltip(ind, ex, ey) {
-  if (!ind.notes && !ind.name && !ind.year) { hideTooltip(); return; }
+function showTooltip(ind,ex,ey){
+  if(!ind.notes&&!ind.name&&!ind.year){hideTooltip();return;}
   const parts=[];
-  if (ind.name) parts.push(`<b>${ind.name}</b>`);
-  if (ind.year) parts.push(`Born: ${ind.year}`);
-  if (ind.notes) parts.push(ind.notes);
+  if(ind.name)parts.push(`<b>${ind.name}</b>`);
+  if(ind.year){const age=YEAR_NOW-parseInt(ind.year);parts.push(`Born: ${ind.year}${age>0&&age<150?' (age '+age+')':''}`);}
+  if(ind.notes)parts.push(ind.notes);
   tooltip.innerHTML=parts.join('<br>');
   tooltip.style.display='block';
-  tooltip.style.left=Math.min(ex+12,window.innerWidth-210)+'px';
+  tooltip.style.left=Math.min(ex+14,window.innerWidth-230)+'px';
   tooltip.style.top=Math.max(ey-50,0)+'px';
 }
-function hideTooltip() { tooltip.style.display='none'; }
+function hideTooltip(){tooltip.style.display='none';}
 
 // ── MOUSE ──
 canvas.addEventListener('mousedown',e=>{
-  if (e.button===1||(e.button===0&&e.altKey)) {
-    S.panning=true; S.panSx=e.clientX; S.panSy=e.clientY;
-    S.panSpx=S.panX; S.panSpy=S.panY; e.preventDefault(); return;
-  }
-  if (e.button!==0) return;
+  if(e.button===1){S.panning=true;S.panSx=e.clientX;S.panSy=e.clientY;S.panSpx=S.panX;S.panSpy=S.panY;e.preventDefault();return;}
+  if(S.spaceHeld&&e.button===0){S.spacePanning=true;S.spacePanSx=e.clientX;S.spacePanSy=e.clientY;S.spacePanPx=S.panX;S.spacePanPy=S.panY;e.preventDefault();return;}
+  if(e.button!==0)return;
   const p=cpos(e),w=s2w(p.x,p.y),h=hit(w.x,w.y);
 
-  if (S.tool==='select') {
-    if (h!==null) {
-      S.selectedId=h; S.dragging=true; S.dragId=h;
-      const ind=S.individuals.find(i=>i.id===h);
-      S.dragOx=w.x-ind.x; S.dragOy=w.y-ind.y;
-      showProps(h); showPanel('props');
-    } else { S.selectedId=null; showProps(null); }
-  } else if (['male','female','unknown','miscarriage'].includes(S.tool)) {
-    if (h!==null) { S.selectedId=h; showProps(h); showPanel('props'); }
-    else { snapshot(); const n=addInd(w.x,w.y,S.tool); S.selectedId=n.id; showProps(n.id); showPanel('props'); }
-  } else if (['marry','consang','child','twin'].includes(S.tool)) {
-    if (h!==null) {
-      if (S.connStep===0) {
-        S.connStep=1; S.connFirst=h; S.connType=S.tool;
-        document.getElementById('hint').style.display='block';
-      } else {
-        if (h!==S.connFirst) { snapshot(); connect(S.connFirst,h,S.connType); }
-        S.connStep=0; S.connFirst=null;
-        document.getElementById('hint').style.display='none';
+  if(S.tool==='select'){
+    if(h!==null){
+      S.selectedRelId=null;
+      if(e.shiftKey){
+        if(S.selected.has(h))S.selected.delete(h); else S.selected.add(h);
+        S.selectedId=h;showProps(h);
+      }else{
+        if(!S.selected.has(h)){S.selected=new Set();S.selected.add(h);}
+        S.selectedId=h;
+        S.dragging=true;S.dragId=h;
+        const allSel=[...S.selected];
+        S.dragGroupOffsets=allSel.map(id=>{const ind=S.individuals.find(i=>i.id===id);return{id,ox:w.x-ind.x,oy:w.y-ind.y};});
+        showProps(h);showPanel('props');
       }
-    } else { S.connStep=0; S.connFirst=null; document.getElementById('hint').style.display='none'; }
+    }else{
+      const rh=hitRel(w.x,w.y);
+      if(rh!==null){S.selectedRelId=rh;S.selectedId=null;S.selected=new Set();showProps(null);}
+      else{
+        if(!e.shiftKey){S.selected=new Set();S.selectedId=null;S.selectedRelId=null;showProps(null);}
+        S.boxSelecting=true;S.boxSx=p.x;S.boxSy=p.y;S.boxEx=p.x;S.boxEy=p.y;
+      }
+    }
+  }else if(['male','female','unknown','miscarriage'].includes(S.tool)){
+    if(h!==null){S.selectedId=h;S.selected=new Set([h]);showProps(h);showPanel('props');}
+    else{snapshot();const n=addInd(w.x,w.y,S.tool);S.selectedId=n.id;S.selected=new Set([n.id]);showProps(n.id);showPanel('props');}
+  }else if(['marry','consang','child','twin'].includes(S.tool)){
+    if(h!==null){
+      if(S.connStep===0){S.connStep=1;S.connFirst=h;S.connType=S.tool;document.getElementById('hint').style.display='block';}
+      else{if(h!==S.connFirst){snapshot();connect(S.connFirst,h,S.connType);}S.connStep=0;S.connFirst=null;document.getElementById('hint').style.display='none';}
+    }else{S.connStep=0;S.connFirst=null;document.getElementById('hint').style.display='none';}
   }
   render();
 });
 
 canvas.addEventListener('mousemove',e=>{
-  const p=cpos(e),w=s2w(p.x,p.y); S.mouseW=w;
+  const p=cpos(e),w=s2w(p.x,p.y);S.mouseW=w;
   document.getElementById('sb-pos').textContent=`x:${Math.round(w.x)} y:${Math.round(w.y)}`;
 
-  if (S.panning) { S.panX=S.panSpx+(e.clientX-S.panSx); S.panY=S.panSpy+(e.clientY-S.panSy); render(); return; }
-  if (S.dragging&&S.dragId!==null) {
-    const ind=S.individuals.find(i=>i.id===S.dragId);
-    if (ind) { ind.x=snapV(w.x-S.dragOx); ind.y=snapV(w.y-S.dragOy); }
-    render(); return;
+  if(S.panning){S.panX=S.panSpx+(e.clientX-S.panSx);S.panY=S.panSpy+(e.clientY-S.panSy);render();return;}
+  if(S.spacePanning){S.panX=S.spacePanPx+(e.clientX-S.spacePanSx);S.panY=S.spacePanPy+(e.clientY-S.spacePanSy);render();return;}
+  if(S.boxSelecting){S.boxEx=p.x;S.boxEy=p.y;render();return;}
+  if(S.dragging&&S.dragGroupOffsets){
+    S.dragGroupOffsets.forEach(({id,ox,oy})=>{
+      const ind=S.individuals.find(i=>i.id===id);
+      if(ind){ind.x=snapV(w.x-ox);ind.y=snapV(w.y-oy);}
+    });
+    render();return;
   }
 
   const h=hit(w.x,w.y);
-  const prev=S.hoverId;
-  S.hoverId=h;
-  if (h!==null) {
-    canvas.style.cursor=S.tool==='select'?'move':'pointer';
+  const rh=hitRel(w.x,w.y);
+  const prevH=S.hoverId,prevR=S.hoverRelId;
+  S.hoverId=h;S.hoverRelId=h===null?rh:null;
+  if(h!==null){
+    canvas.style.cursor=S.tool==='select'?(S.spaceHeld?'grab':'move'):'pointer';
     const ind=S.individuals.find(i=>i.id===h);
-    clearTimeout(tooltipTimer);
-    tooltipTimer=setTimeout(()=>showTooltip(ind,e.clientX,e.clientY),600);
-  } else {
-    canvas.style.cursor=['male','female','unknown','miscarriage'].includes(S.tool)?'crosshair':'default';
-    clearTimeout(tooltipTimer); hideTooltip();
+    clearTimeout(tooltipTimer);tooltipTimer=setTimeout(()=>showTooltip(ind,e.clientX,e.clientY),600);
+  }else{
+    canvas.style.cursor=S.spaceHeld?'grab':['male','female','unknown','miscarriage'].includes(S.tool)?'crosshair':'default';
+    clearTimeout(tooltipTimer);hideTooltip();
   }
-  if (h!==prev||S.connStep===1) render();
+  if(h!==prevH||rh!==prevR||S.connStep===1)render();
 });
 
 canvas.addEventListener('mouseup',e=>{
-  if (S.dragging&&S.dragId!==null) { snapshot(); }
-  S.dragging=false; S.dragId=null; S.panning=false; render();
+  if(S.dragging&&S.dragGroupOffsets)snapshot();
+  if(S.boxSelecting){
+    const sx=Math.min(S.boxSx,S.boxEx)/S.scale-S.panX/S.scale;
+    const sy=Math.min(S.boxSy,S.boxEy)/S.scale-S.panY/S.scale;
+    const ex=Math.max(S.boxSx,S.boxEx)/S.scale-S.panX/S.scale;
+    const ey=Math.max(S.boxSy,S.boxEy)/S.scale-S.panY/S.scale;
+    S.individuals.forEach(ind=>{if(ind.x>=sx&&ind.x<=ex&&ind.y>=sy&&ind.y<=ey)S.selected.add(ind.id);});
+    if(S.selected.size>0)S.selectedId=[...S.selected][0];
+  }
+  S.dragging=false;S.dragId=null;S.dragGroupOffsets=null;
+  S.panning=false;S.spacePanning=false;S.boxSelecting=false;render();
 });
 
 canvas.addEventListener('dblclick',e=>{
   const p=cpos(e),w=s2w(p.x,p.y),h=hit(w.x,w.y);
-  if (h!==null) openRename(h,p.x,p.y);
+  if(h!==null)openRename(h,p.x,p.y);
 });
 
 canvas.addEventListener('wheel',e=>{
   e.preventDefault();
   const p=cpos(e),d=e.deltaY>0?.88:1.13;
-  const ns=Math.max(.15,Math.min(5,S.scale*d));
-  S.panX=p.x-(p.x-S.panX)*(ns/S.scale);
-  S.panY=p.y-(p.y-S.panY)*(ns/S.scale);
-  S.scale=ns; render();
+  zoomBy(d,p.x,p.y);
 },{passive:false});
 
 // ── CONTEXT MENU ──
 canvas.addEventListener('contextmenu',e=>{
   e.preventDefault();
   const p=cpos(e),w=s2w(p.x,p.y),h=hit(w.x,w.y);
-  if (h!==null) {
-    S.ctxId=h; S.selectedId=h; showProps(h);
+  if(h!==null){
+    S.ctxId=h;S.selectedId=h;if(!S.selected.has(h))S.selected=new Set([h]);showProps(h);
     const ind=S.individuals.find(i=>i.id===h);
     document.getElementById('ctx-label').textContent=ind.name||ind.label||`ID #${h}`;
-    const m=document.getElementById('ctx');
-    m.style.display='block';
+    const hasRels=S.relationships.some(r=>r.ids.includes(h));
+    document.getElementById('ctx-del-rels').style.display=hasRels?'flex':'none';
+    const m=document.getElementById('ctx');m.style.display='block';
     m.style.left=Math.min(e.clientX,window.innerWidth-185)+'px';
-    m.style.top=Math.min(e.clientY,window.innerHeight-280)+'px';
+    m.style.top=Math.min(e.clientY,window.innerHeight-300)+'px';
     render();
   }
 });
@@ -827,218 +1015,496 @@ document.addEventListener('click',()=>document.getElementById('ctx').style.displ
 function ctxT(p){const ind=S.individuals.find(i=>i.id===S.ctxId);if(ind){snapshot();ind[p]=!ind[p];showProps(ind.id);render();}}
 function ctxG(g){const ind=S.individuals.find(i=>i.id===S.ctxId);if(ind){snapshot();ind.gender=g;showProps(ind.id);render();}}
 function ctxDup(){if(S.ctxId)duplicate(S.ctxId);}
-function ctxDel(){if(S.ctxId!==null)delInd(S.ctxId);}
+function ctxDel(){if(S.ctxId!==null){snapshot();S.individuals=S.individuals.filter(i=>i.id!==S.ctxId);S.relationships=S.relationships.filter(r=>!r.ids.includes(S.ctxId));if(S.selectedId===S.ctxId){S.selectedId=null;S.selected.delete(S.ctxId);showProps(null);}render();}}
+function ctxDelRels(){if(S.ctxId!==null){snapshot();S.relationships=S.relationships.filter(r=>!r.ids.includes(S.ctxId));render();}}
 
 // ── PROPERTIES PANEL ──
-function showProps(id) {
+function showProps(id){
   const el=document.getElementById('props-content');
-  if (!id) { el.innerHTML='<div class="no-sel">Select an individual<br>to edit properties.<br><br>Use <code>right-click</code> for quick options.<br>Use <code>dbl-click</code> to rename.</div>'; return; }
-  const ind=S.individuals.find(i=>i.id===id);
-  if (!ind) return;
+  if(!id){el.innerHTML='<div class="no-sel">Select an individual<br>to edit properties.<br><br>Use <code>right-click</code> for quick options.<br>Use <code>dbl-click</code> to rename.</div>';buildStats();return;}
+  const ind=S.individuals.find(i=>i.id===id);if(!ind)return;
   const pb=(prop,val,lbl)=>`<button class="prop-btn ${ind[prop]===val?'on':''}" onclick="setProp(${id},'${prop}',${typeof val==='string'?`'${val}'`:val})">${lbl}</button>`;
   const pt=(prop,lbl)=>`<button class="prop-btn ${ind[prop]?'on':''}" onclick="togProp(${id},'${prop}')">${lbl}</button>`;
-
+  const age=ind.year&&(YEAR_NOW-parseInt(ind.year))>0?(` — age ${YEAR_NOW-parseInt(ind.year)}`):'';
   el.innerHTML=`
-    <div class="prop-group">
-      <div class="prop-lbl">Auto ID</div>
-      <div class="prop-id">${ind.label||'—'}</div>
+    <div class="prop-group"><div class="prop-lbl">Auto ID</div><div class="prop-id">${ind.label||'—'}</div></div>
+    <div class="prop-group"><div class="prop-lbl">Name</div><input class="prop-input" value="${ind.name||''}" placeholder="Enter name…" oninput="setPropI(${id},'name',this.value)" onchange="snapshot()"></div>
+    <div class="prop-group"><div class="prop-lbl">Birth Year${age}</div><input class="prop-input" type="number" value="${ind.year||''}" placeholder="e.g. 1972" min="1000" max="${YEAR_NOW}" oninput="setPropI(${id},'year',this.value)" onchange="snapshot()"></div>
+    <div class="prop-group"><div class="prop-lbl">Gender</div>
+      <div class="prop-row">${pb('gender','male','♂ Male')}${pb('gender','female','♀ Female')}</div>
+      <div class="prop-row">${pb('gender','unknown','? Unknown')}${pb('gender','miscarriage','△ Miscar.')}</div>
     </div>
-    <div class="prop-group">
-      <div class="prop-lbl">Name</div>
-      <input class="prop-input" value="${ind.name||''}" placeholder="Enter name…" oninput="setPropInput(${id},'name',this.value)" onchange="snapshot()">
-    </div>
-    <div class="prop-group">
-      <div class="prop-lbl">Birth Year</div>
-      <input class="prop-input" type="number" value="${ind.year||''}" placeholder="e.g. 1952" min="1000" max="2100" oninput="setPropInput(${id},'year',this.value)" onchange="snapshot()">
-    </div>
-    <div class="prop-group">
-      <div class="prop-lbl">Gender</div>
-      <div class="prop-row">
-        ${pb('gender','male','♂ Male')}${pb('gender','female','♀ Female')}
-      </div>
-      <div class="prop-row">
-        ${pb('gender','unknown','? Unknown')}${pb('gender','miscarriage','△ Miscar.')}
-      </div>
-    </div>
-    <div class="prop-group">
-      <div class="prop-lbl">Affectedness</div>
+    <div class="prop-group"><div class="prop-lbl">Affectedness</div>
       <div class="prop-row">${pb('affected',false,'Unaffected')}${pb('affected',true,'Affected')}</div>
     </div>
-    <div class="prop-group">
-      <div class="prop-lbl">Modifiers</div>
+    <div class="prop-group"><div class="prop-lbl">Trait Fill Color</div>
+      <div class="color-row">
+        <input type="color" class="color-swatch" value="${ind.traitColor||'#d4d4d4'}" oninput="setPropI(${id},'traitColor',this.value);render()" onchange="snapshot()" title="Affected fill color">
+        <span style="font-size:10px;color:var(--text-dim);">${ind.traitColor||'Default'}</span>
+        <button class="prop-btn" onclick="setPropI(${id},'traitColor','');render()" style="flex:none;padding:2px 6px;font-size:9px">Reset</button>
+      </div>
+    </div>
+    <div class="prop-group"><div class="prop-lbl">Modifiers</div>
       <div class="prop-row">${pt('carrier','◈ Carrier')}${pt('deceased','⊘ Deceased')}</div>
       <div class="prop-row">${pt('propositus','➤ Propositus')}</div>
     </div>
-    <div class="prop-group">
-      <div class="prop-lbl">Notes (hover tooltip)</div>
-      <textarea class="prop-input" rows="3" placeholder="Clinical notes…" style="resize:vertical;min-height:54px;" oninput="setPropInput(${id},'notes',this.value)" onchange="snapshot()">${ind.notes||''}</textarea>
+    <div class="prop-group"><div class="prop-lbl">Notes (hover tooltip)</div>
+      <textarea class="prop-input" rows="3" placeholder="Clinical notes…" style="resize:vertical;min-height:52px" oninput="setPropI(${id},'notes',this.value)" onchange="snapshot()">${ind.notes||''}</textarea>
     </div>
-    <div class="prop-group">
-      <button class="prop-btn" onclick="duplicate(${id})" style="width:100%">⊕ Duplicate</button>
-    </div>
-    <div class="prop-group">
-      <button class="prop-btn red" onclick="delInd(${id})" style="width:100%">✕ Delete Individual</button>
-    </div>
+    <div class="prop-group"><button class="prop-btn" onclick="duplicate(${id})" style="width:100%">⊕ Duplicate</button></div>
+    <div class="prop-group"><button class="prop-btn red" onclick="delInd(${id})" style="width:100%">✕ Delete Individual</button></div>
   `;
+  buildStats();
 }
-
-function setProp(id,prop,val) {
-  const ind=S.individuals.find(i=>i.id===id);
-  if(ind){snapshot();ind[prop]=val;showProps(id);render();}
-}
-function togProp(id,prop) {
-  const ind=S.individuals.find(i=>i.id===id);
-  if(ind){snapshot();ind[prop]=!ind[prop];showProps(id);render();}
-}
-function setPropInput(id,prop,val) {
-  const ind=S.individuals.find(i=>i.id===id);
-  if(ind){ind[prop]=val;render();}
-}
-function delInd(id) {
-  snapshot();
-  S.individuals=S.individuals.filter(i=>i.id!==id);
-  S.relationships=S.relationships.filter(r=>!r.ids.includes(id));
-  if(S.selectedId===id){S.selectedId=null;showProps(null);}
-  render();
-}
+function setProp(id,prop,val){const ind=S.individuals.find(i=>i.id===id);if(ind){snapshot();ind[prop]=val;showProps(id);render();}}
+function togProp(id,prop){const ind=S.individuals.find(i=>i.id===id);if(ind){snapshot();ind[prop]=!ind[prop];showProps(id);render();}}
+function setPropI(id,prop,val){const ind=S.individuals.find(i=>i.id===id);if(ind){ind[prop]=val;render();}}
+function delInd(id){snapshot();S.individuals=S.individuals.filter(i=>i.id!==id);S.relationships=S.relationships.filter(r=>!r.ids.includes(id));if(S.selectedId===id){S.selectedId=null;S.selected.delete(id);showProps(null);}render();}
 
 // ── PANEL SWITCHING ──
-function showPanel(name) {
-  ['tools','props','legend'].forEach(n=>{
-    document.getElementById('panel-'+n).classList.remove('show');
-    document.getElementById('act-'+n).classList.remove('active');
-  });
+function showPanel(name){
+  ['tools','props','stats','legend'].forEach(n=>{document.getElementById('panel-'+n).classList.remove('show');document.getElementById('act-'+n)?.classList.remove('active');});
   document.getElementById('panel-'+name).classList.add('show');
-  document.getElementById('act-'+name).classList.add('active');
+  document.getElementById('act-'+name)?.classList.add('active');
+  if(name==='stats')buildStats();
+}
+
+// ── MODE SWITCHING (Pedigree ↔ Punnett) ──
+let appMode='pedigree';
+function setMode(m){
+  appMode=m;
+  document.getElementById('tab-ped').classList.toggle('active',m==='pedigree');
+  document.getElementById('tab-pun').classList.toggle('active',m==='punnett');
+  document.getElementById('editor').style.display=m==='pedigree'?'':'none';
+  document.getElementById('actbar').style.display=m==='pedigree'?'':'none';
+  document.getElementById('sidebar').style.display=m==='pedigree'?'':'none';
+  document.getElementById('punnett-view').classList.toggle('show',m==='punnett');
+  if(m==='punnett')renderPunInputs();
 }
 
 // ── EXPORT PNG ──
-function exportPNG() {
-  if (!S.individuals.length) { alert('Nothing to export.'); return; }
+function exportPNG(){
+  if(!S.individuals.length){alert('Nothing to export.');return;}
   let mx=Infinity,my=Infinity,Mx=-Infinity,My=-Infinity;
-  S.individuals.forEach(ind=>{
-    mx=Math.min(mx,ind.x-R-60);my=Math.min(my,ind.y-R-60);
-    Mx=Math.max(Mx,ind.x+R+60);My=Math.max(My,ind.y+R+60);
-  });
+  S.individuals.forEach(i=>{mx=Math.min(mx,i.x-R-60);my=Math.min(my,i.y-R-60);Mx=Math.max(Mx,i.x+R+60);My=Math.max(My,i.y+R+60);});
   const W=Mx-mx,H=My-my;
-  const tc=document.createElement('canvas'); tc.width=W; tc.height=H;
+  const tc=document.createElement('canvas');tc.width=W;tc.height=H;
   const tx=tc.getContext('2d');
-  tx.fillStyle='#1e1e1e'; tx.fillRect(0,0,W,H);
-  tx.save(); tx.translate(-mx,-my);
+  tx.fillStyle=lightTheme?'#f5f5f5':'#1e1e1e';tx.fillRect(0,0,W,H);
+  tx.save();tx.translate(-mx,-my);
   S.relationships.forEach(rel=>drawRelOn(tx,rel));
   S.individuals.forEach(ind=>drawIndOn(tx,ind));
-  // gen labels
-  const bands=[];
-  S.individuals.forEach(ind=>{let f=bands.find(b=>Math.abs(ind.y-b.y)<55);if(!f){f={y:ind.y,members:[]};bands.push(f);}f.members.push(ind);});
-  bands.sort((a,b)=>a.y-b.y);
+  const bands=getBands();
   bands.forEach((band,gi)=>{
-    tx.fillStyle='#3d4e5e'; tx.font='bold 13px JetBrains Mono,Consolas,monospace';
-    tx.textAlign='left'; tx.fillText(ROMAN(gi+1),mx+10,band.y+5);
+    tx.fillStyle=lightTheme?'#8a9aaa':'#3d4e5e';tx.font='bold 13px JetBrains Mono,Consolas,monospace';
+    tx.textAlign='left';tx.fillText(ROMAN(gi+1),mx+12,band.y+5);
   });
   tx.restore();
-  const a=document.createElement('a'); a.download='rootify-pedigree.png'; a.href=tc.toDataURL('image/png'); a.click();
+  const a=document.createElement('a');a.download='rootify-pedigree.png';a.href=tc.toDataURL('image/png');a.click();
 }
 
-function drawRelOn(c,rel) {
-  c.save(); c.strokeStyle='#d4d4d4'; c.lineWidth=1.5; c.setLineDash([]);
+function drawRelOn(c,rel){
+  c.save();c.strokeStyle='#d4d4d4';c.lineWidth=1.5;c.setLineDash([]);
   const get=id=>S.individuals.find(i=>i.id===id);
-  if (rel.type==='marriage'||rel.type==='consanguineous') {
-    const p1=get(rel.ids[0]),p2=get(rel.ids[1]);
-    if(!p1||!p2){c.restore();return;}
+  if(rel.type==='marriage'||rel.type==='consanguineous'){
+    const p1=get(rel.ids[0]),p2=get(rel.ids[1]);if(!p1||!p2){c.restore();return;}
     const lx=Math.min(p1.x,p2.x)+R,rx=Math.max(p1.x,p2.x)-R,my=(p1.y+p2.y)/2;
     if(rel.type==='consanguineous'){c.beginPath();c.moveTo(lx,my-2.5);c.lineTo(rx,my-2.5);c.stroke();c.beginPath();c.moveTo(lx,my+2.5);c.lineTo(rx,my+2.5);c.stroke();}
     else{c.beginPath();c.moveTo(lx,my);c.lineTo(rx,my);c.stroke();}
-  } else if (rel.type==='child') {
+  }else if(rel.type==='child'){
     if(rel.ids.length===3){
-      const p1=get(rel.ids[0]),p2=get(rel.ids[1]),ch=get(rel.ids[2]);
-      if(!p1||!p2||!ch){c.restore();return;}
-      const mx2=(p1.x+p2.x)/2,pmy=(p1.y+p2.y)/2,dy=pmy+Math.max(40,(ch.y-R-pmy)*.4);
-      c.beginPath();c.moveTo(mx2,pmy);c.lineTo(mx2,dy);c.stroke();
-      c.beginPath();c.moveTo(mx2,dy);c.lineTo(ch.x,dy);c.stroke();
-      c.beginPath();c.moveTo(ch.x,dy);c.lineTo(ch.x,ch.y-R);c.stroke();
-    } else {
-      const par=get(rel.ids[0]),ch=get(rel.ids[1]);
-      if(!par||!ch){c.restore();return;}
-      const my2=(par.y+R+ch.y-R)/2;
-      c.beginPath();c.moveTo(par.x,par.y+R);c.lineTo(par.x,my2);c.lineTo(ch.x,my2);c.lineTo(ch.x,ch.y-R);c.stroke();
+      const p1=get(rel.ids[0]),p2=get(rel.ids[1]),ch=get(rel.ids[2]);if(!p1||!p2||!ch){c.restore();return;}
+      const mx=(p1.x+p2.x)/2,pmy=(p1.y+p2.y)/2,dy=pmy+Math.max(40,(ch.y-R-pmy)*.4);
+      c.beginPath();c.moveTo(mx,pmy);c.lineTo(mx,dy);c.stroke();c.beginPath();c.moveTo(mx,dy);c.lineTo(ch.x,dy);c.stroke();c.beginPath();c.moveTo(ch.x,dy);c.lineTo(ch.x,ch.y-R);c.stroke();
+    }else{
+      const par=get(rel.ids[0]),ch=get(rel.ids[1]);if(!par||!ch){c.restore();return;}
+      const m=(par.y+R+ch.y-R)/2;c.beginPath();c.moveTo(par.x,par.y+R);c.lineTo(par.x,m);c.lineTo(ch.x,m);c.lineTo(ch.x,ch.y-R);c.stroke();
     }
-  } else if (rel.type==='twin') {
-    const c1=get(rel.ids[0]),c2=get(rel.ids[1]);
-    if(!c1||!c2){c.restore();return;}
-    const mx3=(c1.x+c2.x)/2,topY=Math.min(c1.y,c2.y)-R-28;
-    c.beginPath();c.moveTo(mx3,topY);c.lineTo(c1.x,c1.y-R);c.stroke();
-    c.beginPath();c.moveTo(mx3,topY);c.lineTo(c2.x,c2.y-R);c.stroke();
+  }else if(rel.type==='twin'){
+    const c1=get(rel.ids[0]),c2=get(rel.ids[1]);if(!c1||!c2){c.restore();return;}
+    const mx=(c1.x+c2.x)/2,topY=Math.min(c1.y,c2.y)-R-28;
+    c.beginPath();c.moveTo(mx,topY);c.lineTo(c1.x,c1.y-R);c.stroke();c.beginPath();c.moveTo(mx,topY);c.lineTo(c2.x,c2.y-R);c.stroke();
     if(rel.identical){c.beginPath();c.moveTo(c1.x,topY+(c1.y-R-topY)/2);c.lineTo(c2.x,topY+(c2.y-R-topY)/2);c.stroke();}
   }
   c.restore();
 }
-
-function drawIndOn(c,ind) {
-  const {x,y,gender,affected,carrier,deceased,propositus}=ind;
-  c.save();
-  c.strokeStyle='#d4d4d4'; c.lineWidth=1.5; c.fillStyle=affected?'#d4d4d4':'transparent';
-  if(gender==='male')drawSqOn(c,x,y,R,carrier&&!affected);
-  else if(gender==='female')drawCirOn(c,x,y,R,carrier&&!affected);
-  else if(gender==='unknown')drawDiaOn(c,x,y,R,carrier&&!affected);
+function drawIndOn(c,ind){
+  const{x,y,gender,affected,carrier,deceased,propositus}=ind;
+  c.save();c.strokeStyle='#d4d4d4';c.lineWidth=1.5;c.fillStyle=affected?(ind.traitColor||'#d4d4d4'):'transparent';
+  if(gender==='male'){if(carrier&&!affected){c.fillStyle='transparent';c.fillRect(x-R,y-R,R*2,R*2);c.strokeRect(x-R,y-R,R*2,R*2);c.fillStyle='#d4d4d4';c.fillRect(x-R,y-R,R,R*2);c.strokeRect(x-R,y-R,R*2,R*2);}else{c.fillRect(x-R,y-R,R*2,R*2);c.strokeRect(x-R,y-R,R*2,R*2);}}
+  else if(gender==='female'){c.beginPath();c.arc(x,y,R,0,Math.PI*2);if(carrier&&!affected){c.stroke();c.save();c.beginPath();c.rect(x-R,y-R,R,R*2);c.clip();c.fillStyle='#d4d4d4';c.beginPath();c.arc(x,y,R,0,Math.PI*2);c.fill();c.restore();c.beginPath();c.arc(x,y,R,0,Math.PI*2);c.stroke();}else{c.fill();c.stroke();}}
+  else if(gender==='unknown'){const p=()=>{c.beginPath();c.moveTo(x,y-R);c.lineTo(x+R,y);c.lineTo(x,y+R);c.lineTo(x-R,y);c.closePath();};if(carrier&&!affected){p();c.stroke();c.save();c.beginPath();c.rect(x-R,y-R,R,R*2);c.clip();c.fillStyle='#d4d4d4';p();c.fill();c.restore();p();c.stroke();}else{p();c.fill();c.stroke();}}
   else if(gender==='miscarriage'){c.fillStyle='#d4d4d4';c.beginPath();c.moveTo(x,y+R*.7);c.lineTo(x-R*.7,y-R*.7);c.lineTo(x+R*.7,y-R*.7);c.closePath();c.fill();c.stroke();}
   if(deceased){c.strokeStyle='#d4d4d4';c.lineWidth=1.5;c.beginPath();c.moveTo(x-R-5,y+R+5);c.lineTo(x+R+5,y-R-5);c.stroke();}
   if(propositus){const ax=x-R-26,ay=y+R+16,tx2=x-R-2,ty=y+2,ang=Math.atan2(ty-ay,tx2-ax);c.strokeStyle='#4ec9b0';c.fillStyle='#4ec9b0';c.lineWidth=1.8;c.beginPath();c.moveTo(ax,ay);c.lineTo(tx2,ty);c.stroke();c.beginPath();c.moveTo(tx2,ty);c.lineTo(tx2-9*Math.cos(ang-.45),ty-9*Math.sin(ang-.45));c.lineTo(tx2-9*Math.cos(ang+.45),ty-9*Math.sin(ang+.45));c.closePath();c.fill();}
-  const lbl=ind.name||ind.label;
-  if(lbl){const sr=gender==='miscarriage'?R*.7:R;c.fillStyle='#7a8894';c.font='10px JetBrains Mono,Consolas,monospace';c.textAlign='center';c.fillText(lbl,x,y+sr+15);}
-  if(ind.year){const sr=gender==='miscarriage'?R*.7:R;c.fillStyle='#4a5568';c.font='9px JetBrains Mono,Consolas,monospace';c.textAlign='center';c.fillText('b.'+ind.year,x,y+sr+26);}
+  const lbl=ind.name||ind.label;const nr=gender==='miscarriage'?R*.7:R;
+  if(lbl){c.fillStyle='#7a8894';c.font='10px JetBrains Mono,Consolas,monospace';c.textAlign='center';c.fillText(lbl,x,y+nr+15);}
+  if(ind.year){c.fillStyle='#4a5568';c.font='9px JetBrains Mono,Consolas,monospace';c.textAlign='center';c.fillText('b.'+ind.year,x,y+nr+26);}
   c.restore();
 }
-function drawSqOn(c,x,y,r,carrier){if(carrier){c.fillStyle='transparent';c.fillRect(x-r,y-r,r*2,r*2);c.strokeRect(x-r,y-r,r*2,r*2);c.fillStyle='#d4d4d4';c.fillRect(x-r,y-r,r,r*2);c.strokeRect(x-r,y-r,r*2,r*2);}else{c.fillRect(x-r,y-r,r*2,r*2);c.strokeRect(x-r,y-r,r*2,r*2);}}
-function drawCirOn(c,x,y,r,carrier){c.beginPath();c.arc(x,y,r,0,Math.PI*2);if(carrier){c.stroke();c.save();c.beginPath();c.rect(x-r,y-r,r,r*2);c.clip();c.fillStyle='#d4d4d4';c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.restore();c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();}else{c.fill();c.stroke();}}
-function drawDiaOn(c,x,y,r,carrier){const p=()=>{c.beginPath();c.moveTo(x,y-r);c.lineTo(x+r,y);c.lineTo(x,y+r);c.lineTo(x-r,y);c.closePath();};if(carrier){p();c.stroke();c.save();c.beginPath();c.rect(x-r,y-r,r,r*2);c.clip();c.fillStyle='#d4d4d4';p();c.fill();c.restore();p();c.stroke();}else{p();c.fill();c.stroke();}}
 
 // ── CLEAR ──
-function clearAll() {
+function clearAll(){
   if(!S.individuals.length)return;
-  if(!confirm('Clear everything?'))return;
-  snapshot();
-  S.individuals=[]; S.relationships=[]; S.selectedId=null;
-  S.connStep=0; S.connFirst=null;
-  document.getElementById('hint').style.display='none';
-  showProps(null); render();
+  if(!confirm('Clear all individuals and relationships?'))return;
+  snapshot();S.individuals=[];S.relationships=[];S.selectedId=null;S.selected=new Set();
+  S.connStep=0;S.connFirst=null;document.getElementById('hint').style.display='none';
+  showProps(null);render();
 }
 
 // ── KEYBOARD ──
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
   const k=e.key;
-  if(k==='z'&&(e.ctrlKey||e.metaKey)&&!e.shiftKey){e.preventDefault();undo();return;}
-  if((k==='y'&&(e.ctrlKey||e.metaKey))||(k==='z'&&(e.ctrlKey||e.metaKey)&&e.shiftKey)){e.preventDefault();redo();return;}
-  if(k==='d'&&(e.ctrlKey||e.metaKey)){e.preventDefault();if(S.selectedId)duplicate(S.selectedId);return;}
-  // nudge
-  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k)&&S.selectedId!==null) {
-    e.preventDefault();
-    const step=e.shiftKey?1:10;
-    const ind=S.individuals.find(i=>i.id===S.selectedId);
-    if(ind){
-      if(k==='ArrowUp')ind.y-=step;
-      if(k==='ArrowDown')ind.y+=step;
-      if(k==='ArrowLeft')ind.x-=step;
-      if(k==='ArrowRight')ind.x+=step;
-      render();
-    }
-    return;
+  if(k===' '&&!e.repeat){S.spaceHeld=true;canvas.style.cursor='grab';e.preventDefault();return;}
+  if((k==='z'||k==='Z')&&(e.ctrlKey||e.metaKey)&&!e.shiftKey){e.preventDefault();undo();return;}
+  if(((k==='y'||k==='Y')&&(e.ctrlKey||e.metaKey))||((k==='z'||k==='Z')&&(e.ctrlKey||e.metaKey)&&e.shiftKey)){e.preventDefault();redo();return;}
+  if((k==='d'||k==='D')&&(e.ctrlKey||e.metaKey)){e.preventDefault();if(S.selectedId)duplicate(S.selectedId);return;}
+  if((k==='s'||k==='S')&&(e.ctrlKey||e.metaKey)&&!e.shiftKey){e.preventDefault();saveJSON();return;}
+  if((k==='a'||k==='A')&&(e.ctrlKey||e.metaKey)){e.preventDefault();selectAll();return;}
+  if(k==='0'&&(e.ctrlKey||e.metaKey)&&e.shiftKey){e.preventDefault();zoomToFit();return;}
+  if((k==='f'||k==='F')&&(e.ctrlKey||e.metaKey)){e.preventDefault();zoomToSel();return;}
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k)&&S.selectedId!==null){
+    e.preventDefault();const step=e.shiftKey?1:10;
+    const ids=S.selected.size?[...S.selected]:[S.selectedId];
+    ids.forEach(id=>{const ind=S.individuals.find(i=>i.id===id);if(!ind)return;
+      if(k==='ArrowUp')ind.y-=step;if(k==='ArrowDown')ind.y+=step;
+      if(k==='ArrowLeft')ind.x-=step;if(k==='ArrowRight')ind.x+=step;});
+    render();return;
   }
   const lk=k.toLowerCase();
-  if(lk==='v'||k==='Escape'){setTool('select');}
+  if(lk==='v'||k==='Escape'){setTool('select');if(k==='Escape')document.getElementById('ctx').style.display='none';}
   else if(lk==='m')setTool('male');
-  else if(lk==='f')setTool('female');
+  else if(lk==='f'&&!e.ctrlKey)setTool('female');
   else if(lk==='u')setTool('unknown');
   else if(lk==='i')setTool('miscarriage');
   else if(lk==='r')setTool('marry');
   else if(lk==='k')setTool('consang');
   else if(lk==='c')setTool('child');
   else if(lk==='t')setTool('twin');
-  else if((k==='Delete'||k==='Backspace')&&S.selectedId!==null)delInd(S.selectedId);
+  else if(k==='Delete'||k==='Backspace'){
+    if(S.selectedRelId!==null){snapshot();S.relationships=S.relationships.filter(r=>r.id!==S.selectedRelId);S.selectedRelId=null;render();}
+    else deleteSelected();
+  }
   else if(k==='0'&&(e.ctrlKey||e.metaKey)){e.preventDefault();resetView();}
 });
+document.addEventListener('keyup',e=>{if(e.key===' '){S.spaceHeld=false;canvas.style.cursor='default';}});
 
-updUndoRedo();
+// ══════════════════════════════════════════
+// PUNNETT SQUARE MODULE
+// ══════════════════════════════════════════
+let punMode='mono';
+const PUN={
+  mono:{dom:'Complete',p1:'Aa',p2:'Aa',trait:'Trait',domName:'Dominant',recName:'Recessive'},
+  di:{dom:'Complete',p1:'AaBb',p2:'AaBb',traitA:'Trait A',traitB:'Trait B'},
+  xlink:{femaleType:'carrier',maleType:'normal',trait:'Trait'},
+  blood:{p1:'Ao',p2:'Bo'}
+};
+
+function setPunMode(m){
+  punMode=m;
+  ['mono','di','xlink','blood'].forEach(k=>document.getElementById('pun-'+k).classList.toggle('active',k===m));
+  renderPunInputs();
+}
+
+function renderPunInputs(){
+  const c=document.getElementById('pun-inputs');
+  if(punMode==='mono'){
+    c.innerHTML=`
+      <div style="padding:8px 10px">
+        <div class="pun-row"><div class="pun-lbl">Parent 1</div><input class="pun-inp" id="p1-inp" value="${PUN.mono.p1}" maxlength="2" style="width:60px" oninput="PUN.mono.p1=this.value.trim()||'Aa'"></div>
+        <div class="pun-row"><div class="pun-lbl">Parent 2</div><input class="pun-inp" id="p2-inp" value="${PUN.mono.p2}" maxlength="2" style="width:60px" oninput="PUN.mono.p2=this.value.trim()||'Aa'"></div>
+        <div class="pun-row"><div class="pun-lbl">Dominance</div>
+          <select class="pun-sel" onchange="PUN.mono.dom=this.value">
+            <option value="Complete" ${PUN.mono.dom==='Complete'?'selected':''}>Complete</option>
+            <option value="Incomplete" ${PUN.mono.dom==='Incomplete'?'selected':''}>Incomplete</option>
+            <option value="Codominant" ${PUN.mono.dom==='Codominant'?'selected':''}>Codominant</option>
+          </select>
+        </div>
+        <div class="pun-row"><div class="pun-lbl">Trait</div><input class="pun-inp" value="${PUN.mono.trait}" style="width:100px;font-size:11px" oninput="PUN.mono.trait=this.value"></div>
+        <div class="pun-row"><div class="pun-lbl">Dominant</div><input class="pun-inp" value="${PUN.mono.domName}" style="width:100px;font-size:11px" oninput="PUN.mono.domName=this.value"></div>
+        <div class="pun-row"><div class="pun-lbl">Recessive</div><input class="pun-inp" value="${PUN.mono.recName}" style="width:100px;font-size:11px" oninput="PUN.mono.recName=this.value"></div>
+      </div>`;
+  }else if(punMode==='di'){
+    c.innerHTML=`
+      <div style="padding:8px 10px">
+        <div class="pun-row"><div class="pun-lbl">Parent 1</div><input class="pun-inp" value="${PUN.di.p1}" maxlength="4" style="width:80px" oninput="PUN.di.p1=this.value.trim()||'AaBb'"></div>
+        <div class="pun-row"><div class="pun-lbl">Parent 2</div><input class="pun-inp" value="${PUN.di.p2}" maxlength="4" style="width:80px" oninput="PUN.di.p2=this.value.trim()||'AaBb'"></div>
+        <div class="pun-row"><div class="pun-lbl">Dominance</div>
+          <select class="pun-sel" onchange="PUN.di.dom=this.value">
+            <option value="Complete" ${PUN.di.dom==='Complete'?'selected':''}>Complete</option>
+            <option value="Incomplete" ${PUN.di.dom==='Incomplete'?'selected':''}>Incomplete</option>
+          </select>
+        </div>
+        <div class="pun-row"><div class="pun-lbl">Trait A</div><input class="pun-inp" value="${PUN.di.traitA}" style="width:100px;font-size:11px" oninput="PUN.di.traitA=this.value"></div>
+        <div class="pun-row"><div class="pun-lbl">Trait B</div><input class="pun-inp" value="${PUN.di.traitB}" style="width:100px;font-size:11px" oninput="PUN.di.traitB=this.value"></div>
+      </div>`;
+  }else if(punMode==='xlink'){
+    c.innerHTML=`
+      <div style="padding:8px 10px">
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px">X-linked inheritance. Capital = dominant allele.</div>
+        <div class="pun-row"><div class="pun-lbl">Mother</div>
+          <select class="pun-sel" onchange="PUN.xlink.femaleType=this.value">
+            <option value="dom_hom" ${PUN.xlink.femaleType==='dom_hom'?'selected':''}>X^A X^A (Dom. Hom.)</option>
+            <option value="carrier" ${PUN.xlink.femaleType==='carrier'?'selected':''}>X^A X^a (Carrier)</option>
+            <option value="rec_hom" ${PUN.xlink.femaleType==='rec_hom'?'selected':''}>X^a X^a (Rec. Hom.)</option>
+          </select>
+        </div>
+        <div class="pun-row"><div class="pun-lbl">Father</div>
+          <select class="pun-sel" onchange="PUN.xlink.maleType=this.value">
+            <option value="normal" ${PUN.xlink.maleType==='normal'?'selected':''}>X^A Y (Normal)</option>
+            <option value="affected" ${PUN.xlink.maleType==='affected'?'selected':''}>X^a Y (Affected)</option>
+          </select>
+        </div>
+        <div class="pun-row"><div class="pun-lbl">Trait</div><input class="pun-inp" value="${PUN.xlink.trait}" style="width:110px;font-size:11px" oninput="PUN.xlink.trait=this.value"></div>
+      </div>`;
+  }else if(punMode==='blood'){
+    const opts=['AA','Ao','BB','Bo','AB','OO'];
+    c.innerHTML=`
+      <div style="padding:8px 10px">
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px">ABO Blood Type Inheritance</div>
+        <div class="pun-row"><div class="pun-lbl">Parent 1</div>
+          <select class="pun-sel" onchange="PUN.blood.p1=this.value">
+            ${opts.map(o=>`<option value="${o}" ${PUN.blood.p1===o?'selected':''}>${o} (${bloodTypeName(o)})</option>`).join('')}
+          </select>
+        </div>
+        <div class="pun-row"><div class="pun-lbl">Parent 2</div>
+          <select class="pun-sel" onchange="PUN.blood.p2=this.value">
+            ${opts.map(o=>`<option value="${o}" ${PUN.blood.p2===o?'selected':''}>${o} (${bloodTypeName(o)})</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+  }
+}
+
+function bloodTypeName(g){return{AA:'Type A',Ao:'Type A',BB:'Type B',Bo:'Type B',AB:'Type AB',OO:'Type O'}[g]||'';}
+function bloodPhenotype(g){
+  const u=g.toUpperCase();
+  if(u==='AB')return'AB';
+  const hasA=g.includes('A'),hasB=g.includes('B');
+  const hasO=g.toLowerCase().includes('o');
+  if(hasA&&hasB)return'AB';
+  if(hasA)return'A';
+  if(hasB)return'B';
+  return'O';
+}
+
+function getGametes(genotype){
+  if(genotype.length===2){return[[genotype[0]],[genotype[1]]];}
+  if(genotype.length===4){
+    const a=[genotype[0],genotype[1]],b=[genotype[2],genotype[3]];
+    return[[a[0]+b[0]],[a[0]+b[1]],[a[1]+b[0]],[a[1]+b[1]]];
+  }
+  return[[genotype]];
+}
+
+function renderPunnett(){
+  const main=document.getElementById('punnett-main');main.innerHTML='';
+  if(punMode==='mono')renderMono(main);
+  else if(punMode==='di')renderDi(main);
+  else if(punMode==='xlink')renderXLink(main);
+  else if(punMode==='blood')renderBlood(main);
+}
+
+function phenoClass(geno,dom){
+  const g=geno;
+  const alleles=g.split('');
+  const hasUpper=alleles.some(a=>a===a.toUpperCase()&&a!==a.toLowerCase());
+  const allUpper=alleles.every(a=>a===a.toUpperCase()&&a!==a.toLowerCase());
+  const allLower=alleles.every(a=>a===a.toLowerCase()&&a!==a.toUpperCase());
+  if(dom==='Complete')return hasUpper?'pun-dom':'pun-rec';
+  if(dom==='Incomplete'){if(allUpper)return'pun-inc-dom';if(allLower)return'pun-rec';return'pun-inc-mid';}
+  if(dom==='Codominant'){if(allUpper)return'pun-dom';if(allLower)return'pun-rec';return'pun-cod-ab';}
+  return'pun-dom';
+}
+function phenoLabel(geno,dom,domN,recN){
+  const alleles=geno.split('');
+  const hasUpper=alleles.some(a=>a===a.toUpperCase()&&a!==a.toLowerCase());
+  const allUpper=alleles.every(a=>a===a.toUpperCase()&&a!==a.toLowerCase());
+  const allLower=alleles.every(a=>a===a.toLowerCase()&&a!==a.toUpperCase());
+  if(dom==='Complete')return hasUpper?domN:recN;
+  if(dom==='Incomplete'){if(allUpper)return domN;if(allLower)return recN;return'Intermediate';}
+  if(dom==='Codominant'){if(allUpper)return domN;if(allLower)return recN;return domN+recN;}
+  return domN;
+}
+
+function renderMono(parent){
+  const p1=PUN.mono.p1.slice(0,2).padEnd(2,'a'),p2=PUN.mono.p2.slice(0,2).padEnd(2,'a');
+  const g1=[[p1[0]],[p1[1]]],g2=[[p2[0]],[p2[1]]];
+  const results=[];
+  for(let r=0;r<2;r++)for(let c2=0;c2<2;c2++)results.push([r,c2,g1[r][0]+g2[c2][0]]);
+
+  const dom=PUN.mono.dom,dn=PUN.mono.domName,rn=PUN.mono.recName;
+  let html=`<table class="pun-grid"><tr><th class="pun-corner"></th><th>${g2[0]}</th><th>${g2[1]}</th></tr>`;
+  for(let r=0;r<2;r++){
+    html+=`<tr><th>${g1[r]}</th>`;
+    for(let c2=0;c2<2;c2++){
+      const geno=results[r*2+c2][2];
+      const cls=phenoClass(geno,dom);
+      html+=`<td class="pun-result ${cls}">${geno}</td>`;
+    }
+    html+=`</tr>`;
+  }
+  html+='</table>';
+
+  const card=makeCard(`Monohybrid Cross — ${PUN.mono.trait} (${dom} Dominance)`,html);
+  parent.appendChild(card);
+  parent.appendChild(makeRatioCard(results.map(r=>r[2]),dom,dn,rn));
+}
+
+function renderDi(parent){
+  const p1=PUN.di.p1.slice(0,4).padEnd(4,'a'),p2=PUN.di.p2.slice(0,4).padEnd(4,'a');
+  const mkGametes=s=>[s[0]+s[2],s[0]+s[3],s[1]+s[2],s[1]+s[3]];
+  const g1=mkGametes(p1),g2=mkGametes(p2);
+  const results=[];
+  for(let r=0;r<4;r++)for(let c=0;c<4;c++){
+    const gm=g1[r][0]+g2[c][0]+g1[r][1]+g2[c][1];
+    results.push([r,c,gm]);
+  }
+  const dom=PUN.di.dom;
+  let html=`<table class="pun-grid"><tr><th class="pun-corner"></th>${g2.map(g=>`<th style="font-size:10px">${g}</th>`).join('')}</tr>`;
+  for(let r=0;r<4;r++){
+    html+=`<tr><th style="font-size:10px">${g1[r]}</th>`;
+    for(let c=0;c<4;c++){
+      const geno=results[r*4+c][2];
+      const hasA=geno.slice(0,2).some(ch=>ch===ch.toUpperCase()&&ch!==ch.toLowerCase());
+      const hasB=geno.slice(2,4).some(ch=>ch===ch.toUpperCase()&&ch!==ch.toLowerCase());
+      const cls=hasA&&hasB?'pun-dom':(!hasA&&!hasB)?'pun-rec':hasA?'pun-het':'pun-inc-mid';
+      html+=`<td class="pun-result ${cls}" style="font-size:11px">${geno}</td>`;
+    }
+    html+=`</tr>`;
+  }
+  html+='</table>';
+  parent.appendChild(makeCard(`Dihybrid Cross — ${PUN.di.traitA} × ${PUN.di.traitB}`,html));
+
+  // Phenotype ratios for dihybrid
+  const classes={};
+  results.forEach(([r,c,g])=>{
+    const hasA=g[0]===g[0].toUpperCase()&&g[0]!==g[0].toLowerCase()||g[1]===g[1].toUpperCase()&&g[1]!==g[1].toLowerCase();
+    const hasB=g[2]===g[2].toUpperCase()&&g[2]!==g[2].toLowerCase()||g[3]===g[3].toUpperCase()&&g[3]!==g[3].toLowerCase();
+    const k=hasA&&hasB?'A+B (both dominant)':(!hasA&&!hasB)?'a+b (both recessive)':hasA?`A only (${PUN.di.traitA})`:`B only (${PUN.di.traitB})`;
+    classes[k]=(classes[k]||0)+1;
+  });
+  const n=results.length;
+  const rc=makeCard('Phenotype Ratios','');
+  rc.querySelector('.pun-card-hdr').textContent='Phenotype Ratios';
+  const body=document.createElement('div');
+  Object.entries(classes).forEach(([k,v])=>{
+    body.innerHTML+=`<div class="ratio-row"><span class="ratio-k">${k}</span><span class="ratio-v">${v}/${n} (${Math.round(v/n*100)}%)</span></div><div class="ratio-bar" style="width:${v/n*100}%;max-width:calc(100% - 28px)"></div>`;
+  });
+  rc.appendChild(body);parent.appendChild(rc);
+}
+
+function renderXLink(parent){
+  const fType=PUN.xlink.femaleType,mType=PUN.xlink.maleType;
+  const femAlleles=fType==='dom_hom'?['X^A','X^A']:fType==='carrier'?['X^A','X^a']:['X^a','X^a'];
+  const malAlleles=mType==='normal'?['X^A','Y']:['X^a','Y'];
+  const results=[];
+  for(let r=0;r<2;r++)for(let c=0;c<2;c++){results.push({r,c,geno:femAlleles[r]+malAlleles[c]});}
+  let html=`<table class="pun-grid"><tr><th class="pun-corner"></th>${malAlleles.map(a=>`<th style="font-size:10px">${a}</th>`).join('')}</tr>`;
+  for(let r=0;r<2;r++){
+    html+=`<tr><th style="font-size:10px">${femAlleles[r]}</th>`;
+    for(let c=0;c<2;c++){
+      const g=results[r*2+c].geno;
+      const isY=g.includes('Y');
+      const hasDom=g.includes('X^A');
+      const cls=isY?(hasDom?'pun-dom':'pun-rec'):(g.includes('X^A')&&!g.includes('X^a')||g.split('X^A').length>2)?'pun-dom':g.includes('X^a')&&g.includes('X^A')?'pun-het':'pun-rec';
+      html+=`<td class="pun-result ${cls}" style="font-size:10px">${g}</td>`;
+    }
+    html+=`</tr>`;
+  }
+  html+='</table>';
+  parent.appendChild(makeCard(`X-Linked — ${PUN.xlink.trait}`,html));
+
+  const rc=makeCard('Offspring Phenotypes','');
+  const body=document.createElement('div');
+  const labels=results.map(({geno})=>{
+    const isY=geno.includes('Y');const hasDom=geno.includes('X^A');
+    if(isY)return hasDom?'Male — Normal':'Male — Affected';
+    const alleles=geno.split('X^').filter(Boolean);
+    const domCount=alleles.filter(a=>a==='A').length;
+    if(domCount===2)return'Female — Normal (hom)';
+    if(domCount===1)return'Female — Carrier';
+    return'Female — Affected';
+  });
+  const counts={};labels.forEach(l=>counts[l]=(counts[l]||0)+1);
+  Object.entries(counts).forEach(([k,v])=>{
+    body.innerHTML+=`<div class="ratio-row"><span class="ratio-k">${k}</span><span class="ratio-v">${v}/4 (${v*25}%)</span></div><div class="ratio-bar" style="width:${v*25}%;max-width:calc(100% - 28px)"></div>`;
+  });
+  rc.appendChild(body);parent.appendChild(rc);
+}
+
+function renderBlood(parent){
+  const p1=PUN.blood.p1,p2=PUN.blood.p2;
+  const g1=[p1[0],p1[1]],g2=[p2[0],p2[1]];
+  const results=[];
+  for(let r=0;r<2;r++)for(let c=0;c<2;c++){
+    const combo=[g1[r],g2[c]].sort((a,b)=>{const o=['A','B','O','i'];return o.indexOf(a)-o.indexOf(b);}).join('');
+    results.push({r,c,geno:combo});
+  }
+  const bloodClasses={'A':'pun-blood-a','B':'pun-blood-b','AB':'pun-blood-ab','O':'pun-blood-o'};
+  let html=`<table class="pun-grid"><tr><th class="pun-corner"></th>${g2.map(a=>`<th>${a}</th>`).join('')}</tr>`;
+  for(let r=0;r<2;r++){
+    html+=`<tr><th>${g1[r]}</th>`;
+    for(let c=0;c<2;c++){
+      const g=results[r*2+c].geno;const pheno=bloodPhenotype(g);const cls=bloodClasses[pheno]||'pun-dom';
+      html+=`<td class="pun-result ${cls}">${g}<br><span style="font-size:9px;opacity:.7">Type ${pheno}</span></td>`;
+    }
+    html+=`</tr>`;
+  }
+  html+='</table>';
+  parent.appendChild(makeCard(`ABO Blood Type — ${bloodTypeName(p1)} × ${bloodTypeName(p2)}`,html));
+
+  const counts={};results.forEach(({geno})=>{const k='Type '+bloodPhenotype(geno);counts[k]=(counts[k]||0)+1;});
+  const rc=makeCard('Blood Type Distribution','');
+  const body=document.createElement('div');
+  Object.entries(counts).forEach(([k,v])=>{
+    body.innerHTML+=`<div class="ratio-row"><span class="ratio-k">${k}</span><span class="ratio-v">${v}/4 (${v*25}%)</span></div><div class="ratio-bar" style="width:${v*25}%;max-width:calc(100% - 28px)"></div>`;
+  });
+  rc.appendChild(body);parent.appendChild(rc);
+}
+
+function makeRatioCard(results,dom,dn,rn){
+  const counts={};results.forEach(g=>{counts[g]=(counts[g]||0)+1;});
+  const n=results.length;
+  const phenoCounts={};
+  results.forEach(g=>{const pk=phenoLabel(g,dom,dn,rn);phenoCounts[pk]=(phenoCounts[pk]||0)+1;});
+
+  const card=makeCard('Genotype & Phenotype Ratios','');
+  const body=document.createElement('div');
+  body.innerHTML='<div class="pun-card-hdr" style="font-size:9px;padding:5px 14px">GENOTYPES</div>';
+  Object.entries(counts).sort().forEach(([k,v])=>{
+    body.innerHTML+=`<div class="ratio-row"><span class="ratio-k">${k}</span><span class="ratio-v">${v}/${n} (${Math.round(v/n*100)}%)</span></div><div class="ratio-bar" style="width:${v/n*100}%;max-width:calc(100% - 28px)"></div>`;
+  });
+  body.innerHTML+='<div class="pun-card-hdr" style="font-size:9px;padding:5px 14px;margin-top:4px">PHENOTYPES</div>';
+  Object.entries(phenoCounts).forEach(([k,v])=>{
+    body.innerHTML+=`<div class="ratio-row"><span class="ratio-k">${k}</span><span class="ratio-v">${v}/${n} (${Math.round(v/n*100)}%)</span></div><div class="ratio-bar" style="width:${v/n*100}%;max-width:calc(100% - 28px)"></div>`;
+  });
+  card.appendChild(body);return card;
+}
+
+function makeCard(title,html){
+  const d=document.createElement('div');d.className='pun-card';
+  d.innerHTML=`<div class="pun-card-hdr">${title}</div><div class="pun-grid-wrap">${html}</div>`;
+  return d;
+}
+
+function exportPunnettPNG(){
+  renderPunnett();
+  const main=document.getElementById('punnett-main');
+  if(!main.children.length){alert('Generate a grid first.');return;}
+  setTimeout(()=>{
+    const r=main.getBoundingClientRect();
+    const tc=document.createElement('canvas');tc.width=r.width;tc.height=r.height;
+    const tx=tc.getContext('2d');
+    tx.fillStyle='#1e1e1e';tx.fillRect(0,0,tc.width,tc.height);
+    alert('Export PNG: use your browser\'s screenshot tool on the Punnett grid, or right-click → Save Image on the grid area.\n\n(Full canvas export for Punnett requires html2canvas which is not bundled — this is a single-file app.)');
+  },100);
+}
+
+// Init
+updUR();
+renderPunInputs();
 </script>
 </body>
 </html>
